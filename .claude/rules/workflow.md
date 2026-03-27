@@ -32,6 +32,6 @@ phase 기반 개발을 하는 프로젝트에서 적용한다:
 
 ## Future Ideas Rule
 
-- future 확장 아이디어는 architecture 또는 roadmap의 future note에만 남긴다.
+- future 확장 아이디어는 architecture 또는 roadmap의 future note에 남긴다. 해당 문서가 없는 프로젝트에서는 이슈 트래커나 별도 `future.md`에 기록한다.
 - rules에는 현재 구현에서 실제로 지켜야 하는 규칙만 남긴다.
 - 현재 구현 결정과 future idea를 같은 문장 안에 섞지 않는다.

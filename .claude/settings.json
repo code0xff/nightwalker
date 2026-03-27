@@ -16,7 +16,8 @@
       "Bash(jq:*)",
       "Bash(diff:*)",
       "Bash(echo:*)",
-      "Bash(codex:*)"
+      "Bash(codex:*)",
+      "Bash(grep:*)"
     ]
   }
 }

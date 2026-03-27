@@ -32,6 +32,8 @@ user_invocable: true
 6. integration test 작성
 7. 문서 갱신
 
+변경 유형에 해당하는 테스트만 작성한다 (testing.md "When to Use Which" 참조). 모든 단계를 반드시 거칠 필요는 없다.
+
 ## 3. Push 전 코드 리뷰
 
 커밋 후 push 전에, unpushed commit의 변경 크기에 따라 리뷰 깊이를 조절한다.
