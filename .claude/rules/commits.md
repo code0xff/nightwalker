@@ -19,6 +19,7 @@
 - commit message 형식은 `type: commit message`로 통일한다.
 - 권장 type: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
 - `commit message`는 무엇을 바꿨는지 짧고 구체적으로 적는다.
+- 메시지에는 실제 변경 내용을 담는다. 작업 과정이나 도구 이름을 메시지로 쓰지 않는다 (예: ✗ "codex review 반영", ✗ "리뷰 수정", ✓ "리뷰 중단 기준에 순환 판단 조건 추가").
 
 ## Autonomy
 
