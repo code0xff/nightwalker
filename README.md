@@ -24,20 +24,19 @@ cp -r .claude/ /path/to/your-project/.claude/
 | `commits.md` | 커밋 단위, 메시지, 히스토리 품질 |
 | `workflow.md` | 워크플로우, 문서 계층, phase 규칙 |
 
-### Skills (6개) — 실행 워크플로우
+### Skills (4개) — 실행 워크플로우
 
 | 스킬 | 역할 |
 |------|------|
 | `/plan` | 구현 전 설계 및 계획 수립 |
 | `/phase` | Phase 시작~종료 오케스트레이션 |
-| `/codex-review` | 외부 Codex CLI 반복 리뷰 |
-| `/self-review` | 내부 thinking mode 반복 리뷰 |
-| `/phase-review` | Phase 종료 품질 검증 |
+| `/codex-review` | Push 전 외부 Codex CLI 반복 리뷰 |
+| `/self-review` | Push 전 내부 thinking mode 반복 리뷰 |
 
 ### 라이프사이클
 
 ```
-/plan → /phase → /codex-review + /self-review → commit → /phase-review
+/plan → /phase → commit → /codex-review + /self-review → (push)
 ```
 
 ## 프로젝트별 확장

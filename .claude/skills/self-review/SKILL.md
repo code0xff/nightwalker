@@ -1,17 +1,22 @@
 ---
 name: self-review
-description: Commit 전 thinking mode 반복 심층 리뷰 — 수정할 항목이 없을 때까지 분석-수정 사이클을 반복한다
+description: Push 전 thinking mode 반복 심층 리뷰 — 수정할 항목이 없을 때까지 분석-수정 사이클을 반복한다
 user_invocable: true
 ---
 
 # Self Review
 
-commit 전에 thinking mode로 변경 사항을 심층 분석하고 타당한 개선을 코드에 반영한다.
+push 전에 thinking mode로 unpushed commit의 변경 사항을 심층 분석하고 타당한 개선을 코드에 반영한다.
 수정이 발생하면 재분석하여 더 이상 반영할 항목이 없을 때까지 반복한다.
 
 ## 1. 변경 사항 수집
 
-- `git diff` (unstaged) + `git diff --staged` (staged)로 현재 변경 범위를 파악한다.
+- remote tracking branch를 기준점으로 결정한다.
+  - `git rev-parse --abbrev-ref @{upstream}`로 tracking branch를 확인한다.
+  - tracking branch가 없으면 `origin/main` 또는 `origin/master`를 사용한다.
+- `git log <base>..HEAD --oneline`으로 unpushed commit 목록을 확인한다.
+- `git diff <base>..HEAD`로 push되지 않은 커밋의 전체 변경 범위를 파악한다.
+- uncommitted 변경이 있으면 `git diff` + `git diff --staged`도 포함한다.
 - 변경된 파일의 전체 내용을 읽는다. diff만으로는 주변 컨텍스트를 놓칠 수 있다.
 - 현재 작업의 scope 문서가 있으면 함께 읽어 scope을 확인한다.
 
@@ -52,10 +57,11 @@ extended thinking을 활용하여 다음을 분석한다:
 - **즉시 반영** 항목은 코드를 직접 수정한다.
 - 수정 후 프로젝트의 빌드 검증과 테스트를 실행하여 수정이 다른 것을 깨뜨리지 않았는지 확인한다.
 - 테스트가 실패하면 수정을 되돌리고 **사용자 판단 필요**로 재분류한다.
+- 수정이 완료되면 수정 사항을 commit한다.
 
 ## 5. 반복 리뷰
 
-수정이 1건이라도 발생하면 변경 사항을 다시 수집하고 심층 분석을 재실행한다.
+수정이 1건이라도 발생하면 수정 사항을 commit한 후, 변경 사항을 다시 수집하고 심층 분석을 재실행한다.
 
 ### 반복 조건
 - **계속**: 이번 iteration에서 **즉시 반영** 항목이 1건 이상 있었고, 실제 코드 수정이 발생한 경우
@@ -68,11 +74,11 @@ extended thinking을 활용하여 다음을 분석한다:
 - 각 iteration의 수정 내역을 누적 기록한다.
 - 이전 iteration에서 **무시**로 분류한 항목이 재등장하면 다시 평가하지 않는다.
 - 이전 iteration의 수정이 새로운 문제를 만들었는지에 집중하여 분석한다.
-- 매 iteration마다 변경 사항을 다시 수집한다 (이전 수정이 diff에 반영되어야 하므로).
+- 매 iteration마다 `git diff <base>..HEAD`를 다시 수집한다 (이전 수정 commit이 반영되어야 하므로).
 
 ## 6. 중단 기준
 
-다음 중 하나라도 해당하면 commit 진행을 중단하고 사용자에게 보고한다:
+다음 중 하나라도 해당하면 push 진행을 중단하고 사용자에게 보고한다:
 
 - 동일 변경에서 버그가 2개 이상 발견된 경우
 - 설계 원칙 위반이 발견된 경우
