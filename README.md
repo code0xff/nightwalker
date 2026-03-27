@@ -39,7 +39,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 /plan → /phase (구현 + 리뷰 포함) → (push)
 ```
 
-`/phase`는 구현, 커밋, `/codex-review`, `/self-review`를 내부에서 순차 수행한다. 리뷰를 별도로 실행하려면 `/phase` 없이 직접 호출한다.
+`/phase`는 구현, 커밋, 코드 리뷰를 내부에서 순차 수행한다. 변경 크기에 따라 경량 리뷰(빌드+테스트만) 또는 전체 리뷰(`/codex-review` + `/self-review`)를 선택한다. 리뷰를 별도로 실행하려면 `/phase` 없이 직접 호출한다.
 
 ## 프로젝트별 확장
 
