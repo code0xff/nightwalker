@@ -10,7 +10,7 @@
 ## Feature-scoped Commit Workflow
 
 - 구현은 기능 단위(feature scope)로 나눈다.
-- 각 기능 단위는 구현을 먼저 커밋하고, 테스트는 별도 커밋으로 분리할 수 있다.
+- 각 기능 단위는 구현을 먼저 커밋하고, 테스트는 별도 커밋으로 분리할 수 있다. 단, contract test 선행 규칙(testing.md)이 적용되는 인터페이스 변경은 contract test를 먼저 커밋한다.
 - 기능 단위 간 의존성이 있으면 의존되는 쪽을 먼저 커밋한다.
 - 각 커밋 후 빌드와 기존 테스트가 통과해야 한다.
 
@@ -22,7 +22,7 @@
 
 ## Pre-commit Checks
 
-- commit 전에는 최소한 빌드 검증 또는 해당 변경 범위 테스트를 수행한다.
+- commit 전에는 빌드 검증과 해당 변경 범위 테스트를 수행한다.
 
 ## History Quality
 

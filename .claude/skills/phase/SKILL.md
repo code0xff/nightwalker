@@ -53,7 +53,7 @@ user_invocable: true
 - [ ] 즉시 반영 항목이 코드에 적용되었다.
 - [ ] 사용자 판단 필요 항목이 보고되었고, 사용자 확인을 받았다.
 
-(`codex` CLI가 없으면 이 단계를 건너뛰고 3-2 Self Review만 수행한다.)
+(`codex` CLI가 없거나 실행이 실패하면(네트워크, 인증 등) 이 단계를 건너뛰고 3-2 Self Review만 수행한다.)
 
 #### 3-2. Self Review (thinking mode 심층 분석)
 - [ ] `/self-review`로 thinking mode 심층 리뷰를 실행했다.
@@ -71,8 +71,6 @@ user_invocable: true
 
 중단 시 사용자에게 상황을 보고하고, 구현 방향을 재논의한다.
 
-리뷰가 완료되면 push 가능 상태로 두고 사용자에게 보고한다. push는 사용자가 직접 결정한다.
-
 ## 4. Phase 종료 체크리스트
 
 - [ ] phase 문서의 `Deliverables`가 모두 충족되었다.
@@ -84,3 +82,5 @@ user_invocable: true
 - [ ] 테스트가 현재 phase 기준으로 충분하다.
 - [ ] 다음 phase로 넘길 보류 항목이 기록되었다.
 - [ ] 작업이 의미 있는 commit 단위로 정리되어 있다.
+
+리뷰와 종료 체크리스트가 모두 완료되면 push 가능 상태로 두고 사용자에게 보고한다. push는 사용자가 직접 결정한다.
