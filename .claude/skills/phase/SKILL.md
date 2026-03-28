@@ -35,7 +35,7 @@ user-invocable: true
 
 변경 유형에 해당하는 테스트만 작성한다 (testing.md "When to Use Which" 참조). 모든 단계를 반드시 거칠 필요는 없다.
 
-구현 중 architecture, roadmap, rules 등 문서에 반영이 필요한 변경 사항이 발생하면 구현과 함께 문서를 갱신한다. 문서 변경도 리뷰 대상에 포함된다.
+구현 중 사용자 요청으로 설계가 변경되면: 해당 변경을 문서(architecture, roadmap, phase 등)에 먼저 반영하고, 변경된 설계에 따라 코드를 수정한 뒤, `/codex-review` + `/self-review`를 실행한다. 리뷰 완료 후 나머지 구현을 이어간다.
 
 ## 3. 구현 완료 후 코드 리뷰
 
