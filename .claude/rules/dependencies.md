@@ -1,6 +1,6 @@
 ## Library Selection
 
-- 구현 계획 수립 시 필요한 라이브러리를 조사하고, 선정 결과를 설계 문서(architecture, phase 등)에 확정한다.
+- 구현 계획 수립 시 필요한 라이브러리를 조사하고, 선정 결과를 설계 문서(architecture, workstream 등)에 확정한다.
 - 후보 라이브러리를 비교할 때 다음을 조사한다:
   - 공식 SDK 또는 공식 권장 라이브러리인지
   - 커뮤니티 채택도 (GitHub stars, 주간 다운로드 수, 사용 사례)

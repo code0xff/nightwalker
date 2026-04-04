@@ -1,27 +1,29 @@
 ---
-name: phase
-description: Phase 실행 workflow — phase 시작부터 종료까지의 체크리스트와 실행 순서
+name: workstream
+description: Workstream 실행 workflow — workstream 시작부터 종료까지의 체크리스트와 실행 순서
 user-invocable: true
 ---
 
-# Phase $ARGUMENTS 실행
+# Workstream $ARGUMENTS 실행
+
+> 레거시 별칭: `/phase` (deprecated). 새 작업은 `/workstream` 사용.
 
 ## 0. /plan과의 관계
 
-- phase 실행 전에 `/plan`으로 설계와 구현 계획을 먼저 수립하는 것을 권장한다.
-- `/plan`이 완료된 상태라면 그 계획을 기반으로 phase를 실행한다.
-- `/plan` 없이 바로 `/phase`를 실행해도 된다. 이 경우 시작 체크리스트에서 맥락을 파악한다.
+- workstream 실행 전에 `/plan`으로 설계와 구현 계획을 먼저 수립하는 것을 권장한다.
+- `/plan`이 완료된 상태라면 그 계획을 기반으로 workstream을 실행한다.
+- `/plan` 없이 바로 `/workstream`을 실행해도 된다. 이 경우 시작 체크리스트에서 맥락을 파악한다.
 
-## 1. Phase 시작 체크리스트
+## 1. Workstream 시작 체크리스트
 
-- [ ] roadmap 문서가 있으면 baseline, phase 순서를 확인했다.
-- [ ] 현재 phase 문서가 있으면 읽었다.
-- [ ] 이전 phase의 deferred items가 있으면 확인했다.
-- [ ] 현재 phase의 `Out of Scope`가 있으면 확인했다.
+- [ ] roadmap 문서가 있으면 baseline, workstream 순서를 확인했다.
+- [ ] 현재 workstream 문서가 있으면 읽었다.
+- [ ] 이전 workstream의 deferred items가 있으면 확인했다.
+- [ ] 현재 workstream의 `Out of Scope`가 있으면 확인했다.
 - [ ] architecture 문서가 있으면 관련 제약을 확인했다.
 - [ ] 새로 추가할 코드가 어느 모듈에 속하는지 결정했다.
 - [ ] 이번 작업에서 필요한 최소 테스트 범위를 정했다.
-- [ ] 구현에 필요하지만 문서(architecture, roadmap, phase)에 아직 결정되지 않은 부분이 있으면 분석하여 문서에 반영했다.
+- [ ] 구현에 필요하지만 문서(architecture, roadmap, workstream)에 아직 결정되지 않은 부분이 있으면 분석하여 문서에 반영했다.
 
 ## 2. 실행 순서
 
@@ -37,7 +39,7 @@ user-invocable: true
 
 각 feature 단위 구현 후 `/self-review`를 실행하여 문제를 조기에 발견한다.
 
-구현 중 사용자 요청으로 설계가 변경되면: 해당 변경을 문서(architecture, roadmap, phase 등)에 먼저 반영하고, 변경된 설계에 따라 코드를 수정한 뒤, `/self-review` → `/codex-review` → `/security-review`를 실행한다. 리뷰 완료 후 나머지 구현을 이어간다.
+구현 중 사용자 요청으로 설계가 변경되면: 해당 변경을 문서(architecture, roadmap, workstream 등)에 먼저 반영하고, 변경된 설계에 따라 코드를 수정한 뒤, `/self-review` → `/codex-review` → `/security-review`를 실행한다. 리뷰 완료 후 나머지 구현을 이어간다.
 
 ## 3. 구현 완료 후 코드 리뷰
 
@@ -78,16 +80,16 @@ user-invocable: true
 
 중단 시 사용자에게 상황을 보고하고, 구현 방향을 재논의한다.
 
-## 4. Phase 종료 체크리스트
+## 4. Workstream 종료 체크리스트
 
-- [ ] phase 문서의 `Deliverables`가 모두 충족되었다.
-- [ ] phase 문서의 `Exit Criteria`를 만족한다.
+- [ ] workstream 문서의 `Deliverables`가 모두 충족되었다.
+- [ ] workstream 문서의 `Exit Criteria`를 만족한다.
 - [ ] 프로젝트의 lint가 통과한다.
 - [ ] 프로젝트의 빌드 검증이 통과한다.
 - [ ] 신규 인터페이스, 설정 키가 문서에 반영되었다.
 - [ ] architecture, roadmap, rules에 갱신이 필요한 변경이 있으면 반영되었다.
-- [ ] 테스트가 현재 phase 기준으로 충분하다.
-- [ ] 다음 phase로 넘길 보류 항목이 기록되었다.
+- [ ] 테스트가 현재 workstream 기준으로 충분하다.
+- [ ] 다음 workstream으로 넘길 보류 항목이 기록되었다.
 - [ ] 작업이 의미 있는 commit 단위로 정리되어 있다.
 
 리뷰와 종료 체크리스트가 모두 완료되면 push 가능 상태로 두고 사용자에게 보고한다. push는 사용자가 직접 결정한다.

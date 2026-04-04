@@ -23,8 +23,8 @@
 
 ## Autonomy
 
-- phase 실행 중에는 의미 있는 작업 단위마다 자율적으로 커밋한다. 매 커밋마다 사용자 확인을 받지 않는다.
-- 구현 완료 후 리뷰 단계에서 사용자 확인을 받는다 (phase skill의 리뷰 절차 참조).
+- workstream 실행 중에는 의미 있는 작업 단위마다 자율적으로 커밋한다. 매 커밋마다 사용자 확인을 받지 않는다.
+- 구현 완료 후 리뷰 단계에서 사용자 확인을 받는다 (workstream skill의 리뷰 절차 참조).
 
 ## Pre-commit Checks
 
@@ -40,7 +40,7 @@
 
 ## Branch Strategy
 
-- phase 또는 feature 단위로 브랜치를 생성한다.
+- workstream 또는 feature 단위로 브랜치를 생성한다.
 - 브랜치 네이밍: `type/short-description` (e.g., `feat/user-auth`, `fix/token-expiry`)
 - type은 commit message와 동일한 set을 사용한다: feat, fix, refactor, test, docs, chore
 - main에 직접 커밋은 문서만 변경하거나 설정 수정 등 단순 변경에 한한다.
