@@ -9,9 +9,9 @@
 
 ## Models (optional)
 
-- plan_model: gpt-5.2
+- plan_model: gpt-5.3
 - build_model: claude-sonnet-4.5
-- review_model: gpt-5.2-codex
+- review_model: gpt-5.3-codex
 
 ## Gate Policy
 
