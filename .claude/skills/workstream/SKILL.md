@@ -6,8 +6,6 @@ user-invocable: true
 
 # Workstream $ARGUMENTS 실행
 
-> 레거시 별칭: `/phase` (deprecated). 새 작업은 `/workstream` 사용.
-
 ## 0. /plan과의 관계
 
 - workstream 실행 전에 `/plan`으로 설계와 구현 계획을 먼저 수립하는 것을 권장한다.
