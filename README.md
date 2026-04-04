@@ -77,6 +77,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 - `.claude/profiles/` — 프로파일 템플릿(claude-default, generic-ai, lightweight-fast)
 - `.claude/rules/` — 프로젝트 특화 규칙 추가
 - `.claude/settings.json` — 프로젝트에서 사용하는 빌드/테스트 도구에 맞게 권한 추가 (예: `Bash(cargo:*)`, `Bash(go:*)`, `Bash(make:*)`)
+- `.claude/tests/harness-regression.sh` — 하네스 회귀 테스트
 
 ## Enforcement
 
@@ -103,3 +104,18 @@ cp -r .claude/ /path/to/your-project/.claude/
 
 `/autopilot` 실행 상태는 `.claude/state/autopilot-state.json`에 기록한다.
 실패/중단 후 재개 시 이 파일의 `last_stage`, `last_gate_result`, `error`를 기준으로 이어서 실행한다.
+
+실행 예시:
+
+```bash
+.claude/hooks/run-autopilot.sh start "your-goal"
+.claude/hooks/run-autopilot.sh resume
+```
+
+## CI Enforcement
+
+GitHub Actions(`.github/workflows/harness-ci.yml`)가 push/PR마다 회귀 테스트를 실행한다.
+
+```bash
+.claude/tests/harness-regression.sh
+```

@@ -14,7 +14,7 @@
 
 ## 사용자 확인 필요
 
-- push
+- push (`project-automation.md`의 `allow_auto_push: true`일 때 `/autopilot`에서만 예외 허용)
 - 브랜치 삭제
 - 의존성 추가/제거
 - rules, skills 수정

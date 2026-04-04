@@ -8,11 +8,18 @@
 - automation_mode: full-auto
 - allow_midway_user_prompt: false
 - final_report_only: true
+- allow_auto_push: true
 
 ## Retry Policy
 
 - max_fix_attempts_per_gate: 3
 - max_autopilot_cycles: 8
+
+## Stage Commands
+
+- plan_cmd: unset
+- implement_cmd: unset
+- review_cmd: unset
 
 ## Gate Commands
 

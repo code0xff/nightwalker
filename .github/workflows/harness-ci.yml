@@ -1,0 +1,23 @@
+name: Harness CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  harness-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure tools
+        run: |
+          jq --version
+          rg --version
+
+      - name: Run harness regression
+        run: |
+          chmod +x .claude/tests/harness-regression.sh
+          .claude/tests/harness-regression.sh

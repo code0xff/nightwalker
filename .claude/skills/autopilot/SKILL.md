@@ -18,7 +18,7 @@ user-invocable: true
 
 필수 설정 파일/규칙이 없으면 먼저 생성 또는 보완한다.
 `lint_cmd/build_cmd/test_cmd`가 `unset`이면 `.claude/hooks/suggest-automation-gates.sh`로 후보를 채운 뒤 검토한다.
-새 세션 시작 시 `.claude/hooks/autopilot-state.sh start "<goal>"`로 상태를 초기화한다.
+새 세션 시작 시 `.claude/hooks/run-autopilot.sh start "<goal>"`를 사용한다.
 
 ## 2. 자동 실행 루프
 
@@ -32,6 +32,7 @@ user-invocable: true
 
 각 단계 전후로 `.claude/hooks/autopilot-state.sh checkpoint ...`를 기록하고,
 gate 결과는 `.claude/hooks/autopilot-state.sh gate ...`로 남긴다.
+중단 후 재개는 `.claude/hooks/run-autopilot.sh resume`를 사용한다.
 
 ## 3. 실패 처리
 

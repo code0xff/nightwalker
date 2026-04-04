@@ -21,6 +21,15 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
+trim() {
+  echo "$1" | awk '{$1=$1; print}'
+}
+
+split_segments() {
+  local cmd="$1"
+  echo "$cmd" | sed -E 's/(\&\&|\|\||\||;)/\n/g'
+}
+
 is_allowlisted() {
   local cmd="$1"
   local allowlist
@@ -66,23 +75,29 @@ is_mutating_command() {
   return 1
 }
 
-# 사용자 명시 승인이 필요한 패턴은 항상 차단한다.
-if is_high_risk_pattern "$COMMAND"; then
-  if ! is_allowlisted "$COMMAND"; then
-    echo "pre-approval 차단: 고위험 명령은 Allowlist에 명시 후 실행하세요." >&2
-    echo "command=$COMMAND" >&2
-    exit 2
-  fi
-  exit 0
-fi
+# 세그먼트 단위로 검사하여 복합 커맨드 우회를 막는다.
+while IFS= read -r raw_segment; do
+  segment=$(trim "$raw_segment")
+  [ -z "$segment" ] && continue
 
-# 변경 가능성이 높은 명령은 사전 승인된 prefix만 허용한다.
-if is_mutating_command "$COMMAND"; then
-  if ! is_allowlisted "$COMMAND"; then
-    echo "pre-approval 차단: 사전 승인되지 않은 변경 명령입니다." >&2
-    echo "command=$COMMAND" >&2
-    exit 2
+  # 사용자 명시 승인이 필요한 패턴은 항상 차단한다.
+  if is_high_risk_pattern "$segment"; then
+    if ! is_allowlisted "$segment"; then
+      echo "pre-approval 차단: 고위험 명령은 Allowlist에 명시 후 실행하세요." >&2
+      echo "command=$segment" >&2
+      exit 2
+    fi
+    continue
   fi
-fi
+
+  # 변경 가능성이 높은 명령은 사전 승인된 prefix만 허용한다.
+  if is_mutating_command "$segment"; then
+    if ! is_allowlisted "$segment"; then
+      echo "pre-approval 차단: 사전 승인되지 않은 변경 명령입니다." >&2
+      echo "command=$segment" >&2
+      exit 2
+    fi
+  fi
+done < <(split_segments "$COMMAND")
 
 exit 0

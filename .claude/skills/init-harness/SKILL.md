@@ -55,7 +55,9 @@ user-invocable: true
 `.claude/project-automation.md`를 작성/확정한다.
 
 - `automation_mode`, `allow_midway_user_prompt`, `final_report_only`
+- `allow_auto_push` (full-auto에서 push 자동 허용 여부)
 - `max_fix_attempts_per_gate`, `max_autopilot_cycles`
+- `plan_cmd`, `implement_cmd`, `review_cmd` (자동 오케스트레이션 단계 명령)
 - lint/build/test/security gate 명령
 - commit/push 시 gate 강제 여부
 - 위험도별 자동 반영 정책

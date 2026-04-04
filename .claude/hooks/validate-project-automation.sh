@@ -14,8 +14,12 @@ required_keys=(
   "automation_mode"
   "allow_midway_user_prompt"
   "final_report_only"
+  "allow_auto_push"
   "max_fix_attempts_per_gate"
   "max_autopilot_cycles"
+  "plan_cmd"
+  "implement_cmd"
+  "review_cmd"
   "lint_cmd"
   "build_cmd"
   "test_cmd"
@@ -51,6 +55,16 @@ for bool_key in allow_midway_user_prompt final_report_only run_gates_on_commit r
     exit 2
   fi
 done
+
+allow_auto_push=$(get_value "allow_auto_push")
+if [ "$allow_auto_push" != "true" ] && [ "$allow_auto_push" != "false" ]; then
+  echo "project-automation 검증 실패: allow_auto_push는 true 또는 false여야 합니다." >&2
+  exit 2
+fi
+if [ "$automation_mode" = "full-auto" ] && [ "$allow_auto_push" != "true" ]; then
+  echo "project-automation 검증 실패: full-auto 모드에서는 allow_auto_push=true가 필요합니다." >&2
+  exit 2
+fi
 
 for int_key in max_fix_attempts_per_gate max_autopilot_cycles; do
   val=$(get_value "$int_key")

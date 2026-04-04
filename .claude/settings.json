@@ -12,12 +12,22 @@
       "Bash(which:*)",
       "Bash(pwd)",
       "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(xargs:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(date:*)",
+      "Bash(mktemp:*)",
+      "Bash(test:*)",
+      "Bash(chmod:*)",
       "Bash(wc:*)",
       "Bash(jq:*)",
       "Bash(diff:*)",
       "Bash(echo:*)",
       "Bash(codex:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(.claude/hooks/*)",
+      "Bash(.claude/tests/*)"
     ]
   },
   "hooks": {
