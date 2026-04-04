@@ -29,6 +29,16 @@
             "type": "command",
             "command": ".claude/hooks/validate-commit-msg.sh",
             "if": "Bash(git commit*)"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-project-profile.sh",
+            "if": "Bash(git commit*)"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-project-profile.sh",
+            "if": "Bash(git push*)"
           }
         ]
       }

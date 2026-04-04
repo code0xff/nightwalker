@@ -1,6 +1,7 @@
 # Claude Rules
 
-범용 개발 워크플로우를 위한 Claude Code rules와 skills 모음.
+AI 개발 워크플로우를 위한 harness rules/skills 모음.
+기본값은 Claude 중심 프로파일을 권장하지만, 프로젝트 시작 시 엔진/모델을 고정해 범용으로 운영할 수 있다.
 
 새 프로젝트에 `.claude/` 디렉토리를 복사하여 사용한다.
 
@@ -14,22 +15,20 @@ cp -r .claude/ /path/to/your-project/.claude/
 
 ## Harness 정책
 
-이 저장소의 기본 엔진은 **Claude Code**다.
+이 저장소는 `Core Rules + Engine Profile` 구조를 사용한다.
 
-다만 개발 업무 정형화를 위해 아래 게이트를 **필수**로 강제한다.
+- Core Rules: 품질/테스트/보안/커밋/문서 기준 (엔진 중립)
+- Engine Profile: Plan/Build/Review를 어떤 엔진/모델로 수행할지 결정
 
-1. Plan: `/plan` (**Codex 필수**)
-2. Build: 구현 실행 (**Claude 필수**)
-3. Review: `/codex-review` (**Codex 필수**)
-
-즉, 기본 플로우는 다음과 같다.
+기본 권장 프로파일은 현재와 동일하다.
 
 `Codex Plan → Claude Build → Codex Review`
 
-세부 강제 규칙은 `.claude/rules/workflow.md`와 `CLAUDE.md`를 기준으로 한다.
+프로젝트 시작 시 `/init-harness`로 엔진/모델을 고정하면, 이후 모든 실행은 해당 고정값을 따른다.
+세부 규칙은 `.claude/rules/engine-profile.md`, `.claude/rules/workflow.md`, `CLAUDE.md`를 따른다.
 
 
-### Rules (8개) — 개발 원칙
+### Rules (10개) — 개발 원칙
 
 | 파일 | 역할 |
 |------|------|
@@ -39,14 +38,17 @@ cp -r .claude/ /path/to/your-project/.claude/
 | `docs.md` | 문서 유형, README/API 기준, 품질 원칙 |
 | `testing.md` | 테스트 레이어, 원칙, 규칙 |
 | `commits.md` | 커밋 단위, 메시지, 히스토리 품질 |
+| `engine-profile.md` | 엔진/모델 프로파일, 기본값/고정값 정책 |
+| `engine-adapters.md` | 엔진별 실행 매핑과 intent contract |
 | `workflow.md` | 워크플로우, 문서 계층, workstream 규칙 |
 | `autonomy.md` | 자율 실행 범위, 사용자 확인 경계, 에스컬레이션 |
 
-### Skills (5개) — 실행 워크플로우
+### Skills (6개) — 실행 워크플로우
 
 | 스킬 | 역할 |
 |------|------|
 | `/plan` | 구현 전 설계 및 계획 수립 |
+| `/init-harness` | 프로젝트 시작 시 엔진/모델/게이트 고정 |
 | `/workstream` | Workstream 시작~종료 오케스트레이션 |
 | `/codex-review` | 구현 완료 후 외부 Codex CLI 반복 리뷰 |
 | `/self-review` | 구현 완료 후 내부 thinking mode 반복 리뷰 |
@@ -55,7 +57,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 ### 라이프사이클
 
 ```
-/plan → /workstream (구현 + 리뷰 포함) → (push)
+/init-harness → /plan → /workstream (구현 + 리뷰 포함) → (push)
 ```
 
 `/workstream`은 구현, 커밋, 코드 리뷰를 내부에서 순차 수행한다. 변경 크기에 따라 경량 리뷰(빌드+테스트만) 또는 전체 리뷰(`/codex-review` + `/self-review`)를 선택한다. 리뷰를 별도로 실행하려면 `/workstream` 없이 직접 호출한다.
@@ -66,5 +68,12 @@ cp -r .claude/ /path/to/your-project/.claude/
 
 - `docs/architecture.md` — 프로젝트 아키텍처 문서
 - `docs/roadmap/` — Workstream 정의와 deliverable
+- `.claude/project-profile.md` — 프로젝트 엔진/모델 고정값
+- `.claude/profiles/` — 프로파일 템플릿(claude-default, generic-ai, lightweight-fast)
 - `.claude/rules/` — 프로젝트 특화 규칙 추가
 - `.claude/settings.json` — 프로젝트에서 사용하는 빌드/테스트 도구에 맞게 권한 추가 (예: `Bash(cargo:*)`, `Bash(go:*)`, `Bash(make:*)`)
+
+## Enforcement
+
+- `git commit`, `git push` 전에 `.claude/project-profile.md` 유효성 검증 hook이 실행된다.
+- profile 필수 키 누락, gate 값 오류, placeholder 값(`user-selected`) 미확정 상태는 commit/push를 차단한다.

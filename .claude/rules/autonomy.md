@@ -17,6 +17,7 @@
 - 브랜치 삭제
 - 의존성 추가/제거
 - rules, skills 수정
+- `.claude/project-profile.md` 변경 (엔진/모델/게이트 고정값 변경)
 - 리뷰에서 사용자 판단 필요 항목
 - 설계 문서(architecture, roadmap) 변경
 
