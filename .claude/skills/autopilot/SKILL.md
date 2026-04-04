@@ -1,0 +1,45 @@
+---
+name: autopilot
+description: 목표 입력만으로 plan/구현/검증/리뷰/수정 루프를 자동 실행하는 workflow
+user-invocable: true
+---
+
+# Autopilot $ARGUMENTS
+
+`/autopilot <goal>`은 목표를 받아 중간 승인 없이 가능한 범위에서 완료까지 진행한다.
+
+## 1. 시작 전 확인
+
+- `.claude/project-profile.md`
+- `.claude/project-approvals.md`
+- `.claude/project-automation.md`
+- `rules/autopilot.md`
+
+필수 설정 파일/규칙이 없으면 먼저 생성 또는 보완한다.
+
+## 2. 자동 실행 루프
+
+1. `/plan`으로 실행 계획 확정
+2. 계획 범위 구현
+3. gate 실행 (lint/build/test/security)
+4. `/self-review` + 외부 review 절차
+5. 즉시 반영 항목 수정
+6. gate 재검증
+7. 완료 기준 충족 시 종료, 미충족 시 루프 반복
+
+## 3. 실패 처리
+
+- gate별 실패 수정은 `max_fix_attempts_per_gate` 이내에서 자동 재시도
+- 전체 루프는 `max_autopilot_cycles` 이내에서 반복
+- 초과 시 원인/막힘 지점/다음 조치를 보고하고 종료
+
+## 4. 승인 정책
+
+- `allow_midway_user_prompt: false`면 중간 승인 없이 진행한다.
+- 단, high/critical risk 변경은 자동 적용하지 않고 보고 후 대기한다.
+
+## 5. 최종 산출
+
+- 코드/테스트/문서 반영
+- commit 단위 정리
+- 최종 보고: 변경 요약, 검증 결과, 남은 리스크

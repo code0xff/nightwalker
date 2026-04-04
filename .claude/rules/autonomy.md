@@ -1,6 +1,7 @@
 ## 자율 모드 트리거
 
 - `/workstream` 실행 시 자율 모드 시작. 아래 "자율 허용" 항목을 확인 없이 수행한다.
+- `/autopilot` 실행 시 full-auto 모드 시작. `project-automation.md` 정책을 함께 적용한다.
 - workstream 종료, 에스컬레이션 발생, 또는 사용자 개입 시 자율 모드를 종료하고 사용자 확인 모드로 전환한다.
 - 단순 작업(workstream 없이 진행)에서는 사용자 요청 단위로 자율 실행하고, 각 요청 완료 시 보고한다.
 
@@ -19,6 +20,7 @@
 - rules, skills 수정
 - `.claude/project-profile.md` 변경 (엔진/모델/게이트 고정값 변경)
 - `.claude/project-approvals.md` 변경 (사전 승인 범위 변경)
+- `.claude/project-automation.md` 변경 (자동화/게이트 정책 변경)
 - 리뷰에서 사용자 판단 필요 항목
 - 설계 문서(architecture, roadmap) 변경
 

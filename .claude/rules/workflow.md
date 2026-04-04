@@ -11,9 +11,10 @@
 2. Roadmap / workstream 문서 (있는 경우)
 3. Project profile (`.claude/project-profile.md`, 있는 경우)
 4. Project approvals (`.claude/project-approvals.md`, 있는 경우)
-5. Rules (`.claude/rules/`)
+5. Project automation (`.claude/project-automation.md`, 있는 경우)
+6. Rules (`.claude/rules/`)
 
-구조적 결정은 architecture 문서가 기준이고, 구현 순서는 roadmap이 기준이며, 실행 엔진/모델은 project profile이 기준이고, 사전 승인 범위는 project approvals가 기준이며, 개발 방식은 rules가 기준이다. 해당 문서가 없는 프로젝트에서는 존재하는 하위 기준만 적용한다.
+구조적 결정은 architecture 문서가 기준이고, 구현 순서는 roadmap이 기준이며, 실행 엔진/모델은 project profile이 기준이고, 사전 승인 범위는 project approvals가 기준이며, 자동화 강도/게이트 명령은 project automation이 기준이고, 개발 방식은 rules가 기준이다. 해당 문서가 없는 프로젝트에서는 존재하는 하위 기준만 적용한다.
 
 - 문서와 실제 구현이 불일치하는 경우 문서를 우선한다. 구현을 문서에 맞게 수정하거나, 의도적 변경이라면 문서를 먼저 갱신한 후 구현한다.
 
@@ -47,6 +48,13 @@ workstream 기반 개발을 하는 프로젝트에서 적용한다:
 - roadmap workstream 범위를 넘어 구현하지 않는다.
 - Build 단계는 활성 프로파일의 `build_engine`으로 수행한다.
 - Plan 산출물 범위를 벗어나는 변경은 금지한다. 불가피한 경우 `/plan`을 다시 실행해 계획을 갱신한다.
+
+## Autopilot Execution Rules
+
+`/autopilot` 실행 시 `autopilot.md`와 `project-automation.md`를 함께 적용한다.
+
+- 중간 승인 없이 진행 가능한 범위는 `project-approvals.md`를 기준으로 한다.
+- gate 실행/재시도/중단 기준은 `project-automation.md` 값으로 강제한다.
 
 ## Workstream Completion Verification
 

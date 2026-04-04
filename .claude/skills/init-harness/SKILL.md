@@ -7,7 +7,7 @@ user-invocable: true
 # Init Harness
 
 프로젝트 시작 단계에서 실행할 초기화 절차다.
-목표는 엔진/모델/게이트와 사전 승인 범위를 한 번 확정하고 이후 일관되게 적용하는 것이다.
+목표는 엔진/모델/게이트, 사전 승인 범위, 자동화 실행 정책을 한 번 확정하고 이후 일관되게 적용하는 것이다.
 
 ## 1. 프로파일 선택
 
@@ -50,7 +50,17 @@ user-invocable: true
 - 프로젝트 컨텍스트 운영 규칙은 `rules/token-optimization.md`를 기본값으로 사용한다.
 - 대규모 저장소는 workstream 단위 요약, 부분 조회 우선 원칙을 문서에 명시한다.
 
-## 6. 변경 규칙
+## 6. 자동화 정책 확정
+
+`.claude/project-automation.md`를 작성/확정한다.
+
+- `automation_mode`, `allow_midway_user_prompt`, `final_report_only`
+- `max_fix_attempts_per_gate`, `max_autopilot_cycles`
+- lint/build/test/security gate 명령
+- commit/push 시 gate 강제 여부
+- 위험도별 자동 반영 정책
+
+## 7. 변경 규칙
 
 - 프로파일 변경은 설계 변경으로 취급한다.
 - 변경 전 사용자 확인을 받고, 변경 이유를 커밋 메시지나 문서에 남긴다.

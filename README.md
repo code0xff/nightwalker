@@ -28,7 +28,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 세부 규칙은 `.claude/rules/engine-profile.md`, `.claude/rules/workflow.md`, `CLAUDE.md`를 따른다.
 
 
-### Rules (11개) — 개발 원칙
+### Rules (12개) — 개발 원칙
 
 | 파일 | 역할 |
 |------|------|
@@ -41,15 +41,17 @@ cp -r .claude/ /path/to/your-project/.claude/
 | `engine-profile.md` | 엔진/모델 프로파일, 기본값/고정값 정책 |
 | `engine-adapters.md` | 엔진별 실행 매핑과 intent contract |
 | `token-optimization.md` | 컨텍스트/토큰 사용 최적화 기준 |
+| `autopilot.md` | 완전 자동 실행 루프와 중단/위험 정책 |
 | `workflow.md` | 워크플로우, 문서 계층, workstream 규칙 |
 | `autonomy.md` | 자율 실행 범위, 사용자 확인 경계, 에스컬레이션 |
 
-### Skills (6개) — 실행 워크플로우
+### Skills (7개) — 실행 워크플로우
 
 | 스킬 | 역할 |
 |------|------|
 | `/plan` | 구현 전 설계 및 계획 수립 |
 | `/init-harness` | 프로젝트 시작 시 엔진/모델/게이트 고정 |
+| `/autopilot` | 목표 기반 end-to-end 자동 실행 |
 | `/workstream` | Workstream 시작~종료 오케스트레이션 |
 | `/codex-review` | 구현 완료 후 외부 Codex CLI 반복 리뷰 |
 | `/self-review` | 구현 완료 후 내부 thinking mode 반복 리뷰 |
@@ -71,6 +73,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 - `docs/roadmap/` — Workstream 정의와 deliverable
 - `.claude/project-profile.md` — 프로젝트 엔진/모델 고정값
 - `.claude/project-approvals.md` — 프로젝트 사전 승인 범위
+- `.claude/project-automation.md` — 자동화 모드/재시도/게이트 정책
 - `.claude/profiles/` — 프로파일 템플릿(claude-default, generic-ai, lightweight-fast)
 - `.claude/rules/` — 프로젝트 특화 규칙 추가
 - `.claude/settings.json` — 프로젝트에서 사용하는 빌드/테스트 도구에 맞게 권한 추가 (예: `Bash(cargo:*)`, `Bash(go:*)`, `Bash(make:*)`)
@@ -79,4 +82,6 @@ cp -r .claude/ /path/to/your-project/.claude/
 
 - `git commit`, `git push` 전에 `.claude/project-profile.md` 유효성 검증 hook이 실행된다.
 - `git commit`, `git push` 전에 `.claude/project-approvals.md` 유효성 검증 hook이 실행된다.
+- `git commit`, `git push` 전에 `.claude/project-automation.md` 유효성 검증 hook이 실행된다.
+- `git push` 전에 automation gate(lint/build/test/security)가 자동 실행된다.
 - profile 필수 키 누락, gate 값 오류, placeholder 값(`user-selected`) 미확정 상태는 commit/push를 차단한다.

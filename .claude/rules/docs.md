@@ -7,6 +7,7 @@
   - **Roadmap**: workstream 기반 개발 시 workstream 정의와 deliverable
   - **Project Profile**: 엔진/모델/게이트 고정값 (`.claude/project-profile.md`)
   - **Project Approvals**: 사전 승인 명령/행동 범위 (`.claude/project-approvals.md`)
+  - **Project Automation**: 자동화 모드, 재시도, gate 명령 (`.claude/project-automation.md`)
 - 프로젝트에 필요 없는 문서 유형을 만들지 않는다.
 
 ## README

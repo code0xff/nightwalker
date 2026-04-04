@@ -20,6 +20,7 @@
 - force push
 - secrets 또는 credentials 관련 파일 변경
 - rules/skills/profile 수정
+- project-automation 정책 수정
 
 ## Sandbox / Escalation Policy
 
