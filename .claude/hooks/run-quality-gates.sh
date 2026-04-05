@@ -42,4 +42,14 @@ fi
 
 echo "[quality-gate] $quality_cmd" >&2
 eval "$quality_cmd"
+
+for extra_key in quality_coverage_cmd quality_perf_cmd quality_architecture_cmd; do
+  extra_cmd=$(get_value "$extra_key")
+  if [ "$extra_cmd" = "unset" ]; then
+    continue
+  fi
+  echo "[quality-gate:${extra_key}] $extra_cmd" >&2
+  eval "$extra_cmd"
+done
+
 exit 0

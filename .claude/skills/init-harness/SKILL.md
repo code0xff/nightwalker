@@ -57,14 +57,16 @@ user-invocable: true
 - `automation_mode`, `allow_midway_user_prompt`, `final_report_only`
 - `allow_auto_push` (full-auto에서 push 자동 허용 여부)
 - `engine_runtime_mode`, `allow_engine_stub` (엔진 실행 실패 시 stub 허용 정책)
-- `execute_engine_commands` (실제 엔진 CLI 실행 여부, 기본 false 권장)
+- `execute_engine_commands` (실제 엔진 CLI 실행 여부)
 - `max_fix_attempts_per_gate`, `max_autopilot_cycles`
 - `plan_cmd`, `implement_cmd`, `review_cmd` (자동 오케스트레이션 단계 명령)
+- `engine_cmd_*` (엔진별 어댑터 명령 템플릿)
 - `lint_fix_cmd/build_fix_cmd/test_fix_cmd/security_fix_cmd` (gate 실패 자동 복구 명령)
 - lint/build/test/security gate 명령
 - commit/push 시 gate/quality 강제 여부
-- `quality_cmd` (품질 게이트 명령)
-- `release_mode`, `allow_auto_release`, `deploy/verify/rollback` 명령
+- `quality_cmd`, `quality_coverage_cmd`, `quality_perf_cmd`, `quality_architecture_cmd`
+- `release_mode`, `allow_auto_release`, `deploy/verify/rollback`, `release_smoke_cmd`, retry 정책
+- `enable_metrics_logging`, `metrics_report_on_complete`
 - 위험도별 자동 반영 정책
 
 가능하면 아래 명령으로 gate 후보를 자동 감지한 뒤, 결과를 검토해 확정한다.

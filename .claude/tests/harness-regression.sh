@@ -75,13 +75,15 @@ run_expect_fail_pipe \
 
 run_expect_ok "automation gates push" .claude/hooks/run-automation-gates.sh push
 run_expect_ok "quality gates push" .claude/hooks/run-quality-gates.sh push
+run_expect_ok "engine readiness check" .claude/hooks/check-engine-readiness.sh
 run_expect_ok "engine intent fallback plan" .claude/hooks/run-engine-intent.sh plan "ci-intent"
-run_expect_ok "release stage manual skip" .claude/hooks/run-release-stage.sh
+run_expect_ok "release stage auto" .claude/hooks/run-release-stage.sh
 
 run_expect_ok "autopilot start" .claude/hooks/run-autopilot.sh start "ci-regression"
 run_expect_ok "autopilot resume completed" .claude/hooks/run-autopilot.sh resume
 
 run_expect_ok "autopilot state completed" sh -c \
   'test "$(jq -r ".status" .claude/state/autopilot-state.json)" = "completed"'
+run_expect_ok "metrics report generated" .claude/hooks/report-automation-metrics.sh
 
 pass "all harness regression checks"

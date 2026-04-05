@@ -9,9 +9,9 @@
 - allow_midway_user_prompt: false
 - final_report_only: true
 - allow_auto_push: true
-- engine_runtime_mode: stub-fallback
-- allow_engine_stub: true
-- execute_engine_commands: false
+- engine_runtime_mode: strict
+- allow_engine_stub: false
+- execute_engine_commands: true
 
 ## Retry Policy
 
@@ -23,6 +23,15 @@
 - plan_cmd: unset
 - implement_cmd: unset
 - review_cmd: unset
+
+## Engine Adapter Commands (optional)
+
+- engine_cmd_codex: codex --help >/dev/null
+- engine_cmd_claude: claude --help >/dev/null
+- engine_cmd_openai: unset
+- engine_cmd_cursor: unset
+- engine_cmd_gemini: unset
+- engine_cmd_copilot: unset
 
 ## Gate Fix Commands
 
@@ -51,15 +60,26 @@ gate 명령이 비어 있으면 `.claude/hooks/suggest-automation-gates.sh`를 �
 
 - enable_quality_gates: true
 - quality_cmd: find .claude/hooks -type f -name "*.sh" -print0 | xargs -0 -I{} bash -n "{}" && .claude/hooks/validate-project-profile.sh && .claude/hooks/validate-project-approvals.sh && .claude/hooks/validate-project-automation.sh
+- quality_coverage_cmd: unset
+- quality_perf_cmd: unset
+- quality_architecture_cmd: unset
 
 ## Release Policy
 
-- release_mode: manual
-- allow_auto_release: false
-- require_clean_worktree_before_release: true
-- deploy_cmd: unset
-- verify_release_cmd: unset
-- rollback_cmd: unset
+- release_mode: auto
+- allow_auto_release: true
+- require_clean_worktree_before_release: false
+- deploy_cmd: echo "harness release: no external deploy target"
+- verify_release_cmd: echo "harness release: verify ok"
+- rollback_cmd: echo "harness release: rollback noop"
+- release_smoke_cmd: .claude/hooks/validate-project-automation.sh
+- release_verify_retries: 2
+- release_verify_interval_sec: 1
+
+## Metrics Policy
+
+- enable_metrics_logging: true
+- metrics_report_on_complete: true
 
 ## Risk Policy
 

@@ -34,6 +34,7 @@ user-invocable: true
 각 단계 전후로 `.claude/hooks/autopilot-state.sh checkpoint ...`를 기록하고,
 gate 결과는 `.claude/hooks/autopilot-state.sh gate ...`로 남긴다.
 중단 후 재개는 `.claude/hooks/run-autopilot.sh resume`를 사용한다.
+완료 시 metrics 정책이 켜져 있으면 `.claude/hooks/report-automation-metrics.sh`를 실행한다.
 
 ## 3. 실패 처리
 

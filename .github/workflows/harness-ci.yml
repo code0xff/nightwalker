@@ -21,3 +21,15 @@ jobs:
         run: |
           chmod +x .claude/tests/harness-regression.sh
           .claude/tests/harness-regression.sh
+
+      - name: Generate metrics summary
+        run: |
+          chmod +x .claude/hooks/report-automation-metrics.sh
+          .claude/hooks/report-automation-metrics.sh || true
+
+      - name: Upload metrics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: harness-metrics
+          path: .claude/state/metrics/summary.txt
+          if-no-files-found: ignore

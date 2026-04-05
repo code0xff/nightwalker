@@ -4,6 +4,7 @@ set -euo pipefail
 
 STATE_DIR=".claude/state"
 STATE_FILE="${STATE_DIR}/autopilot-state.json"
+LOG_HOOK=".claude/hooks/log-automation-event.sh"
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "autopilot-state 실패: jq가 필요합니다." >&2
@@ -51,6 +52,11 @@ append_event() {
     '.history += [{"event": $event, "stage": $stage, "detail": $detail, "at": $now}] | .updated_at = $now' \
     "$STATE_FILE" > "$tmp"
   mv "$tmp" "$STATE_FILE"
+
+  if [ -x "$LOG_HOOK" ]; then
+    sid="$(jq -r '.session_id // ""' "$STATE_FILE" 2>/dev/null || true)"
+    "$LOG_HOOK" "$event" "$stage" "$detail" "ok" "$sid" || true
+  fi
 }
 
 update_state() {
@@ -108,6 +114,10 @@ case "$ACTION" in
   fail)
     REASON="${1:-unknown}"
     update_state --arg reason "$REASON" '.status = "failed" | .error = $reason'
+    if [ -x "$LOG_HOOK" ]; then
+      sid="$(jq -r '.session_id // ""' "$STATE_FILE" 2>/dev/null || true)"
+      "$LOG_HOOK" "failed" "error" "$REASON" "fail" "$sid" || true
+    fi
     append_event "failed" "error" "$REASON"
     ;;
   complete)

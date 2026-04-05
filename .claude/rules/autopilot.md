@@ -9,6 +9,7 @@
 - validate는 `project-automation.md`의 gate 명령을 따른다.
 - plan/implement/review는 `project-automation.md`의 `plan_cmd`, `implement_cmd`, `review_cmd`를 따른다.
 - stage 명령이 `unset`이면 `run-engine-intent.sh`로 profile 기반 엔진 어댑터를 실행한다.
+- strict runtime에서는 `check-engine-readiness.sh`를 통과해야 시작할 수 있다.
 - quality는 `quality_cmd`를, release는 `deploy/verify/rollback` 정책을 따른다.
 - gate 실패 시 원인 분석 후 자동 수정한다.
 - 수정 후 같은 gate를 재실행한다.
@@ -31,3 +32,4 @@
 
 - 기본은 `final_report_only: true`를 따른다.
 - 최종 보고에는 변경 요약, 검증 결과, 남은 리스크만 포함한다.
+- metrics가 활성화되어 있으면 `events.jsonl`과 summary를 함께 남긴다.

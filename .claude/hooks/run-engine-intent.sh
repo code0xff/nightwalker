@@ -41,6 +41,16 @@ model="$(get_profile_value "$model_key")"
 runtime_mode="$(get_automation_value "engine_runtime_mode")"
 allow_stub="$(get_automation_value "allow_engine_stub")"
 execute_engine_commands="$(get_automation_value "execute_engine_commands")"
+adapter_cmd="unset"
+
+case "$engine" in
+  codex) adapter_cmd="$(get_automation_value engine_cmd_codex)" ;;
+  claude) adapter_cmd="$(get_automation_value engine_cmd_claude)" ;;
+  openai) adapter_cmd="$(get_automation_value engine_cmd_openai)" ;;
+  cursor) adapter_cmd="$(get_automation_value engine_cmd_cursor)" ;;
+  gemini) adapter_cmd="$(get_automation_value engine_cmd_gemini)" ;;
+  copilot) adapter_cmd="$(get_automation_value engine_cmd_copilot)" ;;
+esac
 
 mkdir -p "$STATE_DIR"
 artifact="${STATE_DIR}/${INTENT}-$(date +%s)-$RANDOM.md"
@@ -48,23 +58,30 @@ artifact="${STATE_DIR}/${INTENT}-$(date +%s)-$RANDOM.md"
 prompt="[intent=${INTENT}] goal=${GOAL}"
 cmd=""
 
-case "$engine" in
-  codex)
-    cmd="codex exec \"$prompt\""
-    ;;
-  claude)
-    cmd="claude -p \"$prompt\""
-    ;;
-  openai)
-    cmd="openai api responses.create -d '{\"model\":\"${model}\",\"input\":\"${prompt}\"}'"
-    ;;
-  cursor|gemini|copilot)
-    cmd="echo \"${engine} adapter placeholder: ${prompt}\""
-    ;;
-  *)
-    cmd="echo \"unknown engine=${engine} intent=${INTENT}\""
-    ;;
-esac
+if [ -n "$adapter_cmd" ] && [ "$adapter_cmd" != "unset" ]; then
+  cmd="$(echo "$adapter_cmd" | sed \
+    -e "s/{intent}/${INTENT}/g" \
+    -e "s/{goal}/${GOAL}/g" \
+    -e "s/{model}/${model}/g")"
+else
+  case "$engine" in
+    codex)
+      cmd="codex exec \"$prompt\""
+      ;;
+    claude)
+      cmd="claude -p \"$prompt\""
+      ;;
+    openai)
+      cmd="openai api responses.create -d '{\"model\":\"${model}\",\"input\":\"${prompt}\"}'"
+      ;;
+    cursor|gemini|copilot)
+      cmd="echo \"${engine} adapter placeholder: ${prompt}\""
+      ;;
+    *)
+      cmd="echo \"unknown engine=${engine} intent=${INTENT}\""
+      ;;
+  esac
+fi
 
 {
   echo "# Engine Intent Artifact"

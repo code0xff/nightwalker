@@ -68,6 +68,11 @@
           },
           {
             "type": "command",
+            "command": ".claude/hooks/check-engine-readiness.sh",
+            "if": "Bash(git commit*)"
+          },
+          {
+            "type": "command",
             "command": ".claude/hooks/run-automation-gates.sh commit",
             "if": "Bash(git commit*)"
           },
@@ -93,12 +98,22 @@
           },
           {
             "type": "command",
+            "command": ".claude/hooks/check-engine-readiness.sh",
+            "if": "Bash(git push*)"
+          },
+          {
+            "type": "command",
             "command": ".claude/hooks/run-automation-gates.sh push",
             "if": "Bash(git push*)"
           },
           {
             "type": "command",
             "command": ".claude/hooks/run-quality-gates.sh push",
+            "if": "Bash(git push*)"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/run-release-stage.sh",
             "if": "Bash(git push*)"
           }
         ]
