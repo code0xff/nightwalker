@@ -74,6 +74,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 - `.claude/project-profile.md` — 프로젝트 엔진/모델 고정값
 - `.claude/project-approvals.md` — 프로젝트 사전 승인 범위
 - `.claude/project-automation.md` — 자동화 모드/재시도/게이트 정책
+- `.claude/completion-contract.md` — 앱 완료 판정 계약(artifact/smoke/acceptance/release)
 - `.claude/profiles/` — 프로파일 템플릿(claude-default, generic-ai, lightweight-fast)
 - `.claude/rules/` — 프로젝트 특화 규칙 추가
 - `.claude/settings.json` — 프로젝트에서 사용하는 빌드/테스트 도구에 맞게 권한 추가 (예: `Bash(cargo:*)`, `Bash(go:*)`, `Bash(make:*)`)
@@ -108,17 +109,34 @@ cp -r .claude/ /path/to/your-project/.claude/
 ```
 
 이 명령은 gate/quality/engine adapter 기본값과 approvals allowlist를 자동으로 채운다.
+또한 completion contract를 현재 게이트 명령 기준으로 자동 연결한다.
+
+## Non-Blocking Automation Policy
+
+완전 자동화를 위해 기본 정책은 `report` 모드다.
+위험/승인 미충족 항목이 있어도 실행은 진행하고, 경고는 리포트 파일로 남긴다.
+
+- `.claude/state/policy-warnings.log`
+- `.claude/state/unset-config-report.txt`
+- `.claude/state/done-check-report.txt`
 
 ## Autopilot State
 
 `/autopilot` 실행 상태는 `.claude/state/autopilot-state.json`에 기록한다.
 실패/중단 후 재개 시 이 파일의 `last_stage`, `last_gate_result`, `error`를 기준으로 이어서 실행한다.
+완료 직전에는 `.claude/hooks/run-done-check.sh`를 실행해 completion contract 기준을 점검한다.
 
 실행 예시:
 
 ```bash
 .claude/hooks/run-autopilot.sh start "your-goal"
 .claude/hooks/run-autopilot.sh resume
+```
+
+완료 기준 점검만 단독 실행하려면:
+
+```bash
+.claude/hooks/run-done-check.sh
 ```
 
 엔진 어댑터 실행:

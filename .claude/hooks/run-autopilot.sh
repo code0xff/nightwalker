@@ -9,6 +9,8 @@ GATE_HOOK=".claude/hooks/run-automation-gates.sh"
 QUALITY_HOOK=".claude/hooks/run-quality-gates.sh"
 ENGINE_HOOK=".claude/hooks/run-engine-intent.sh"
 ENGINE_READY_HOOK=".claude/hooks/check-engine-readiness.sh"
+UNSET_REPORT_HOOK=".claude/hooks/report-unset-config.sh"
+DONE_CHECK_HOOK=".claude/hooks/run-done-check.sh"
 
 if [ ! -f "$AUTOMATION_FILE" ]; then
   echo "run-autopilot 실패: $AUTOMATION_FILE 파일이 없습니다." >&2
@@ -39,6 +41,14 @@ if [ ! -x "$ENGINE_HOOK" ]; then
 fi
 if [ ! -x "$ENGINE_READY_HOOK" ]; then
   echo "run-autopilot 실패: $ENGINE_READY_HOOK 실행 권한이 필요합니다." >&2
+  exit 2
+fi
+if [ ! -x "$UNSET_REPORT_HOOK" ]; then
+  echo "run-autopilot 실패: $UNSET_REPORT_HOOK 실행 권한이 필요합니다." >&2
+  exit 2
+fi
+if [ ! -x "$DONE_CHECK_HOOK" ]; then
+  echo "run-autopilot 실패: $DONE_CHECK_HOOK 실행 권한이 필요합니다." >&2
   exit 2
 fi
 
@@ -175,6 +185,8 @@ GOAL="${*:-autopilot-goal}"
 
 max_cycles=$(get_value "max_autopilot_cycles")
 max_fix_attempts=$(get_value "max_fix_attempts_per_gate")
+unset_enforcement=$(get_value "unresolved_config_enforcement")
+unset_enforcement=${unset_enforcement:-report}
 plan_cmd=$(get_value "plan_cmd")
 implement_cmd=$(get_value "implement_cmd")
 review_cmd=$(get_value "review_cmd")
@@ -216,6 +228,23 @@ esac
 while [ "$cycle" -le "$max_cycles" ]; do
   "$STATE_HOOK" cycle "$cycle"
   if run_sequence_from "$start_stage" "$plan_cmd" "$implement_cmd" "$review_cmd" "$GOAL" "$max_fix_attempts"; then
+    "$STATE_HOOK" checkpoint "done-check" "run completion contract checks"
+    done_report="$("$DONE_CHECK_HOOK")"
+    if [ -n "$done_report" ]; then
+      echo "$done_report" >&2
+    fi
+
+    unset_report="$("$UNSET_REPORT_HOOK" || true)"
+    if [ "$unset_enforcement" = "block" ] && echo "$unset_report" | grep -q '^unset_count=[1-9]'; then
+      "$STATE_HOOK" fail "unset_config_blocked"
+      echo "run-autopilot 실패: unresolved_config_enforcement=block 이며 unset key가 남아 있습니다." >&2
+      echo "$unset_report" >&2
+      exit 2
+    fi
+    if [ "$unset_enforcement" = "report" ] && echo "$unset_report" | grep -q '^unset_count=[1-9]'; then
+      echo "run-autopilot 보고: 미확정 설정이 남아 있습니다." >&2
+      echo "$unset_report" >&2
+    fi
     "$STATE_HOOK" complete
     echo "run-autopilot: completed (cycle=$cycle)"
     exit 0

@@ -14,6 +14,9 @@ required_keys=(
   "automation_mode"
   "allow_midway_user_prompt"
   "final_report_only"
+  "preapproval_enforcement"
+  "risk_enforcement"
+  "unresolved_config_enforcement"
   "allow_auto_push"
   "engine_runtime_mode"
   "allow_engine_stub"
@@ -72,6 +75,14 @@ for bool_key in allow_midway_user_prompt final_report_only run_gates_on_commit r
   val=$(get_value "$bool_key")
   if [ "$val" != "true" ] && [ "$val" != "false" ]; then
     echo "project-automation 검증 실패: ${bool_key}는 true 또는 false여야 합니다." >&2
+    exit 2
+  fi
+done
+
+for mode_key in preapproval_enforcement risk_enforcement unresolved_config_enforcement; do
+  mode_val=$(get_value "$mode_key")
+  if [ "$mode_val" != "report" ] && [ "$mode_val" != "block" ]; then
+    echo "project-automation 검증 실패: ${mode_key}는 report 또는 block이어야 합니다." >&2
     exit 2
   fi
 done

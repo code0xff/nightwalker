@@ -4,6 +4,7 @@ set -euo pipefail
 
 AUTOMATION_FILE=".claude/project-automation.md"
 APPROVALS_FILE=".claude/project-approvals.md"
+CONTRACT_FILE=".claude/completion-contract.md"
 
 if [ ! -f "$AUTOMATION_FILE" ]; then
   echo "bootstrap 실패: $AUTOMATION_FILE 파일이 없습니다." >&2
@@ -12,6 +13,23 @@ fi
 if [ ! -f "$APPROVALS_FILE" ]; then
   echo "bootstrap 실패: $APPROVALS_FILE 파일이 없습니다." >&2
   exit 2
+fi
+if [ ! -f "$CONTRACT_FILE" ]; then
+  cat > "$CONTRACT_FILE" <<'EOF'
+# Completion Contract
+
+앱 개발 완료 판정을 위한 계약을 정의한다.
+기본 정책은 non-blocking(report)이며, 미설정/실패 항목은 최종 보고서에 남긴다.
+
+## Contract
+
+- done_enforcement: report
+- artifact_definition: release artifact generated
+- artifact_check_cmd: echo "artifact check is not configured"
+- run_smoke_cmd: echo "run smoke is not configured"
+- acceptance_test_cmd: .claude/hooks/run-automation-gates.sh push
+- release_readiness_cmd: .claude/hooks/run-quality-gates.sh push
+EOF
 fi
 
 set_automation_key() {
@@ -37,6 +55,26 @@ set_automation_key() {
 get_automation_value() {
   local key="$1"
   grep -E "^- ${key}:" "$AUTOMATION_FILE" | head -n 1 | sed -E "s/^- ${key}:[[:space:]]*//" || true
+}
+
+set_contract_key() {
+  local key="$1"
+  local value="$2"
+  awk -v key="$key" -v value="$value" '
+    BEGIN { updated = 0 }
+    $0 ~ "^- " key ":" {
+      print "- " key ": " value
+      updated = 1
+      next
+    }
+    { print }
+    END {
+      if (updated == 0) {
+        print "- " key ": " value
+      }
+    }
+  ' "$CONTRACT_FILE" > "${CONTRACT_FILE}.tmp"
+  mv "${CONTRACT_FILE}.tmp" "$CONTRACT_FILE"
 }
 
 ensure_allowlist_item() {
@@ -189,7 +227,20 @@ for key in lint_cmd build_cmd test_cmd plan_cmd implement_cmd review_cmd quality
   fi
 done
 
+# 5) completion contract 자동 연결
+build_cmd="$(get_automation_value build_cmd)"
+test_cmd="$(get_automation_value test_cmd)"
+quality_cmd="$(get_automation_value quality_cmd)"
+
+set_contract_key "done_enforcement" "report"
+set_contract_key "artifact_definition" "release artifact generated"
+set_contract_key "artifact_check_cmd" "$build_cmd"
+set_contract_key "run_smoke_cmd" 'echo "run smoke is not configured"'
+set_contract_key "acceptance_test_cmd" "$test_cmd"
+set_contract_key "release_readiness_cmd" "$quality_cmd"
+
 echo "init-harness bootstrap 완료:"
 echo "- automation gates/quality/engine adapter 값 자동 설정"
 echo "- approvals allowlist 자동 보강"
+echo "- completion contract 기본값 자동 설정"
 exit 0

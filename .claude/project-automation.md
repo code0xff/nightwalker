@@ -8,6 +8,9 @@
 - automation_mode: full-auto
 - allow_midway_user_prompt: false
 - final_report_only: true
+- preapproval_enforcement: report
+- risk_enforcement: report
+- unresolved_config_enforcement: report
 - allow_auto_push: true
 - engine_runtime_mode: strict
 - allow_engine_stub: false
@@ -46,7 +49,7 @@ gate 명령이 비어 있으면 `.claude/hooks/suggest-automation-gates.sh`를 �
 
 - lint_cmd: find .claude/hooks -type f -name "*.sh" -print0 | xargs -0 -I{} bash -n "{}"
 - build_cmd: echo "no build step for harness-only repository"
-- test_cmd: .claude/hooks/validate-project-profile.sh && .claude/hooks/validate-project-approvals.sh && .claude/hooks/validate-project-automation.sh
+- test_cmd: .claude/hooks/validate-project-profile.sh && .claude/hooks/validate-project-approvals.sh && .claude/hooks/validate-project-automation.sh && .claude/hooks/validate-completion-contract.sh
 - security_cmd: if rg -n --hidden -S "(AKIA[0-9A-Z]{16}|-----BEGIN (RSA|EC|OPENSSH|PRIVATE) KEY-----|password\s*=|secret\s*=)" .; then echo "잠재적 시크릿 패턴 감지"; exit 1; else exit 0; fi
 
 ## Hook Enforcement
@@ -59,7 +62,7 @@ gate 명령이 비어 있으면 `.claude/hooks/suggest-automation-gates.sh`를 �
 ## Quality Policy
 
 - enable_quality_gates: true
-- quality_cmd: find .claude/hooks -type f -name "*.sh" -print0 | xargs -0 -I{} bash -n "{}" && .claude/hooks/validate-project-profile.sh && .claude/hooks/validate-project-approvals.sh && .claude/hooks/validate-project-automation.sh
+- quality_cmd: find .claude/hooks -type f -name "*.sh" -print0 | xargs -0 -I{} bash -n "{}" && .claude/hooks/validate-project-profile.sh && .claude/hooks/validate-project-approvals.sh && .claude/hooks/validate-project-automation.sh && .claude/hooks/validate-completion-contract.sh
 - quality_coverage_cmd: unset
 - quality_perf_cmd: unset
 - quality_architecture_cmd: unset

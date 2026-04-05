@@ -55,6 +55,7 @@ user-invocable: true
 `.claude/project-automation.md`를 작성/확정한다.
 
 - `automation_mode`, `allow_midway_user_prompt`, `final_report_only`
+- `preapproval_enforcement`, `risk_enforcement`, `unresolved_config_enforcement` (`report`/`block`)
 - `allow_auto_push` (full-auto에서 push 자동 허용 여부)
 - `engine_runtime_mode`, `allow_engine_stub` (엔진 실행 실패 시 stub 허용 정책)
 - `execute_engine_commands` (실제 엔진 CLI 실행 여부)
@@ -74,13 +75,31 @@ user-invocable: true
 ```
 
 초기 입력을 최소화하려면 아래 bootstrap을 우선 실행한다.
-이 스크립트는 gate, quality 세부 명령, engine adapter 템플릿, approvals allowlist를 자동 채운다.
+이 스크립트는 gate, quality 세부 명령, engine adapter 템플릿, approvals allowlist, completion contract를 자동 채운다.
 
 ```bash
 .claude/hooks/bootstrap-init-harness.sh
 ```
 
-## 7. 변경 규칙
+## 7. Completion Contract 확정
+
+`.claude/completion-contract.md`로 앱 완료 기준을 고정한다.
+
+- `artifact_definition`
+- `artifact_check_cmd`
+- `run_smoke_cmd`
+- `acceptance_test_cmd`
+- `release_readiness_cmd`
+- `done_enforcement` (`report`/`block`)
+
+완주 자동화를 목표로 할 때는 기본값 `report`로 두고, 미설정/실패 항목을 최종 보고서에서 후처리한다.
+검증은 아래 명령으로 수행한다.
+
+```bash
+.claude/hooks/validate-completion-contract.sh
+```
+
+## 8. 변경 규칙
 
 - 프로파일 변경은 설계 변경으로 취급한다.
 - 변경 전 사용자 확인을 받고, 변경 이유를 커밋 메시지나 문서에 남긴다.
