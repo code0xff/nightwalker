@@ -1,4 +1,4 @@
-# Claude Rules
+# dev-harness
 
 AI 개발 워크플로우를 위한 harness rules/skills 모음.
 기본값은 Claude 중심 프로파일을 권장하지만, 프로젝트 시작 시 엔진/모델을 고정해 범용으로 운영할 수 있다.

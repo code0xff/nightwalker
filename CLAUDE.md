@@ -1,4 +1,4 @@
-# Claude Rules Harness
+# dev-harness
 
 이 저장소는 AI 코딩 에이전트의 개발 행동을 제어하는 harness다.
 기본값은 Claude 중심 프로파일을 권장하지만, 프로젝트별 고정 프로파일을 우선한다.
