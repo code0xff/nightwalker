@@ -9,6 +9,9 @@
 - allow_midway_user_prompt: false
 - final_report_only: true
 - allow_auto_push: true
+- engine_runtime_mode: stub-fallback
+- allow_engine_stub: true
+- execute_engine_commands: false
 
 ## Retry Policy
 
@@ -20,6 +23,13 @@
 - plan_cmd: unset
 - implement_cmd: unset
 - review_cmd: unset
+
+## Gate Fix Commands
+
+- lint_fix_cmd: unset
+- build_fix_cmd: unset
+- test_fix_cmd: unset
+- security_fix_cmd: unset
 
 ## Gate Commands
 
@@ -34,6 +44,22 @@ gate 명령이 비어 있으면 `.claude/hooks/suggest-automation-gates.sh`를 �
 
 - run_gates_on_commit: false
 - run_gates_on_push: true
+- run_quality_on_commit: false
+- run_quality_on_push: true
+
+## Quality Policy
+
+- enable_quality_gates: true
+- quality_cmd: find .claude/hooks -type f -name "*.sh" -print0 | xargs -0 -I{} bash -n "{}" && .claude/hooks/validate-project-profile.sh && .claude/hooks/validate-project-approvals.sh && .claude/hooks/validate-project-automation.sh
+
+## Release Policy
+
+- release_mode: manual
+- allow_auto_release: false
+- require_clean_worktree_before_release: true
+- deploy_cmd: unset
+- verify_release_cmd: unset
+- rollback_cmd: unset
 
 ## Risk Policy
 

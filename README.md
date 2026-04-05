@@ -86,6 +86,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 - `git commit`, `git push` 전에 `.claude/project-profile.md` 유효성 검증 hook이 실행된다.
 - `git commit`, `git push` 전에 `.claude/project-approvals.md` 유효성 검증 hook이 실행된다.
 - `git commit`, `git push` 전에 `.claude/project-automation.md` 유효성 검증 hook이 실행된다.
+- `git commit`, `git push` 전에 quality gate가 자동 실행될 수 있다.
 - `git push` 전에 automation gate(lint/build/test/security)가 자동 실행된다.
 - profile 필수 키 누락, gate 값 오류, placeholder 값(`user-selected`) 미확정 상태는 commit/push를 차단한다.
 - `run_gates_on_push: true`일 때 gate command를 `unset`으로 둘 수 없다.
@@ -111,6 +112,14 @@ cp -r .claude/ /path/to/your-project/.claude/
 .claude/hooks/run-autopilot.sh start "your-goal"
 .claude/hooks/run-autopilot.sh resume
 ```
+
+엔진 어댑터 실행:
+
+```bash
+.claude/hooks/run-engine-intent.sh plan "your-goal"
+```
+
+기본값은 `execute_engine_commands: false`이며, 이 경우 실제 엔진 CLI를 호출하지 않고 stub artifact만 기록한다.
 
 ## CI Enforcement
 

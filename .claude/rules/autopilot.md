@@ -4,10 +4,12 @@
 
 ## Execution Loop
 
-`plan -> implement -> validate -> review -> fix -> repeat`
+`plan -> implement -> validate -> review -> quality -> release -> repeat`
 
 - validate는 `project-automation.md`의 gate 명령을 따른다.
 - plan/implement/review는 `project-automation.md`의 `plan_cmd`, `implement_cmd`, `review_cmd`를 따른다.
+- stage 명령이 `unset`이면 `run-engine-intent.sh`로 profile 기반 엔진 어댑터를 실행한다.
+- quality는 `quality_cmd`를, release는 `deploy/verify/rollback` 정책을 따른다.
 - gate 실패 시 원인 분석 후 자동 수정한다.
 - 수정 후 같은 gate를 재실행한다.
 - 실행 상태는 `.claude/state/autopilot-state.json`에 기록한다.

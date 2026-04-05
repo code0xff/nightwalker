@@ -15,17 +15,34 @@ required_keys=(
   "allow_midway_user_prompt"
   "final_report_only"
   "allow_auto_push"
+  "engine_runtime_mode"
+  "allow_engine_stub"
+  "execute_engine_commands"
   "max_fix_attempts_per_gate"
   "max_autopilot_cycles"
   "plan_cmd"
   "implement_cmd"
   "review_cmd"
+  "lint_fix_cmd"
+  "build_fix_cmd"
+  "test_fix_cmd"
+  "security_fix_cmd"
   "lint_cmd"
   "build_cmd"
   "test_cmd"
   "security_cmd"
   "run_gates_on_commit"
   "run_gates_on_push"
+  "run_quality_on_commit"
+  "run_quality_on_push"
+  "enable_quality_gates"
+  "quality_cmd"
+  "release_mode"
+  "allow_auto_release"
+  "require_clean_worktree_before_release"
+  "deploy_cmd"
+  "verify_release_cmd"
+  "rollback_cmd"
   "auto_apply_risk_tier"
   "require_user_for_risk_tier"
 )
@@ -48,7 +65,7 @@ if [ "$automation_mode" != "full-auto" ] && [ "$automation_mode" != "assisted-au
   exit 2
 fi
 
-for bool_key in allow_midway_user_prompt final_report_only run_gates_on_commit run_gates_on_push; do
+for bool_key in allow_midway_user_prompt final_report_only run_gates_on_commit run_gates_on_push run_quality_on_commit run_quality_on_push enable_quality_gates allow_engine_stub execute_engine_commands allow_auto_release require_clean_worktree_before_release; do
   val=$(get_value "$bool_key")
   if [ "$val" != "true" ] && [ "$val" != "false" ]; then
     echo "project-automation 검증 실패: ${bool_key}는 true 또는 false여야 합니다." >&2
@@ -64,6 +81,43 @@ fi
 if [ "$automation_mode" = "full-auto" ] && [ "$allow_auto_push" != "true" ]; then
   echo "project-automation 검증 실패: full-auto 모드에서는 allow_auto_push=true가 필요합니다." >&2
   exit 2
+fi
+
+engine_runtime_mode=$(get_value "engine_runtime_mode")
+if [ "$engine_runtime_mode" != "stub-fallback" ] && [ "$engine_runtime_mode" != "strict" ]; then
+  echo "project-automation 검증 실패: engine_runtime_mode는 stub-fallback 또는 strict여야 합니다." >&2
+  exit 2
+fi
+allow_engine_stub=$(get_value "allow_engine_stub")
+if [ "$engine_runtime_mode" = "strict" ] && [ "$allow_engine_stub" != "false" ]; then
+  echo "project-automation 검증 실패: strict 모드에서는 allow_engine_stub=false여야 합니다." >&2
+  exit 2
+fi
+
+enable_quality_gates=$(get_value "enable_quality_gates")
+quality_cmd=$(get_value "quality_cmd")
+if [ "$enable_quality_gates" = "true" ] && [ "$quality_cmd" = "unset" ]; then
+  echo "project-automation 검증 실패: enable_quality_gates=true 일 때 quality_cmd=unset은 허용되지 않습니다." >&2
+  exit 2
+fi
+
+release_mode=$(get_value "release_mode")
+if [ "$release_mode" != "disabled" ] && [ "$release_mode" != "manual" ] && [ "$release_mode" != "auto" ]; then
+  echo "project-automation 검증 실패: release_mode는 disabled/manual/auto 중 하나여야 합니다." >&2
+  exit 2
+fi
+allow_auto_release=$(get_value "allow_auto_release")
+deploy_cmd=$(get_value "deploy_cmd")
+verify_release_cmd=$(get_value "verify_release_cmd")
+if [ "$release_mode" = "auto" ]; then
+  if [ "$allow_auto_release" != "true" ]; then
+    echo "project-automation 검증 실패: release_mode=auto 일 때 allow_auto_release=true가 필요합니다." >&2
+    exit 2
+  fi
+  if [ "$deploy_cmd" = "unset" ] || [ "$verify_release_cmd" = "unset" ]; then
+    echo "project-automation 검증 실패: release_mode=auto 일 때 deploy/verify_release_cmd를 확정해야 합니다." >&2
+    exit 2
+  fi
 fi
 
 for int_key in max_fix_attempts_per_gate max_autopilot_cycles; do

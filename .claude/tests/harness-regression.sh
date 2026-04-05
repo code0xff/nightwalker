@@ -65,12 +65,18 @@ run_expect_fail_pipe \
   '{"tool_input":{"command":"npm install left-pad"}}' \
   ".claude/hooks/enforce-risk-policy.sh"
 
+run_expect_ok "risk classifier output valid tier" sh -c \
+  'tier=$(.claude/hooks/classify-risk.sh "git commit -m \"feat: a\""); echo "$tier" | grep -Eq "^(low|medium|high|critical)$"'
+
 run_expect_fail_pipe \
   "pre-approval blocks chained command bypass" \
   '{"tool_input":{"command":"echo hi; mkdir bypass-dir"}}' \
   ".claude/hooks/validate-pre-approval.sh"
 
 run_expect_ok "automation gates push" .claude/hooks/run-automation-gates.sh push
+run_expect_ok "quality gates push" .claude/hooks/run-quality-gates.sh push
+run_expect_ok "engine intent fallback plan" .claude/hooks/run-engine-intent.sh plan "ci-intent"
+run_expect_ok "release stage manual skip" .claude/hooks/run-release-stage.sh
 
 run_expect_ok "autopilot start" .claude/hooks/run-autopilot.sh start "ci-regression"
 run_expect_ok "autopilot resume completed" .claude/hooks/run-autopilot.sh resume

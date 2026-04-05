@@ -20,14 +20,17 @@
       "Bash(mktemp:*)",
       "Bash(test:*)",
       "Bash(chmod:*)",
+      "Bash(sh:*)",
       "Bash(wc:*)",
       "Bash(jq:*)",
       "Bash(diff:*)",
       "Bash(echo:*)",
       "Bash(codex:*)",
       "Bash(grep:*)",
+      "Bash(rg:*)",
       "Bash(.claude/hooks/*)",
-      "Bash(.claude/tests/*)"
+      "Bash(.claude/tests/*)",
+      "Bash(.github/*)"
     ]
   },
   "hooks": {
@@ -70,6 +73,11 @@
           },
           {
             "type": "command",
+            "command": ".claude/hooks/run-quality-gates.sh commit",
+            "if": "Bash(git commit*)"
+          },
+          {
+            "type": "command",
             "command": ".claude/hooks/validate-project-profile.sh",
             "if": "Bash(git push*)"
           },
@@ -86,6 +94,11 @@
           {
             "type": "command",
             "command": ".claude/hooks/run-automation-gates.sh push",
+            "if": "Bash(git push*)"
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/run-quality-gates.sh push",
             "if": "Bash(git push*)"
           }
         ]

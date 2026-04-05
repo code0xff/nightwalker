@@ -6,6 +6,9 @@ AUTOMATION_FILE=".claude/project-automation.md"
 STATE_FILE=".claude/state/autopilot-state.json"
 STATE_HOOK=".claude/hooks/autopilot-state.sh"
 GATE_HOOK=".claude/hooks/run-automation-gates.sh"
+QUALITY_HOOK=".claude/hooks/run-quality-gates.sh"
+RELEASE_HOOK=".claude/hooks/run-release-stage.sh"
+ENGINE_HOOK=".claude/hooks/run-engine-intent.sh"
 
 if [ ! -f "$AUTOMATION_FILE" ]; then
   echo "run-autopilot 실패: $AUTOMATION_FILE 파일이 없습니다." >&2
@@ -26,18 +29,37 @@ if [ ! -x "$GATE_HOOK" ]; then
   echo "run-autopilot 실패: $GATE_HOOK 실행 권한이 필요합니다." >&2
   exit 2
 fi
+if [ ! -x "$QUALITY_HOOK" ]; then
+  echo "run-autopilot 실패: $QUALITY_HOOK 실행 권한이 필요합니다." >&2
+  exit 2
+fi
+if [ ! -x "$RELEASE_HOOK" ]; then
+  echo "run-autopilot 실패: $RELEASE_HOOK 실행 권한이 필요합니다." >&2
+  exit 2
+fi
+if [ ! -x "$ENGINE_HOOK" ]; then
+  echo "run-autopilot 실패: $ENGINE_HOOK 실행 권한이 필요합니다." >&2
+  exit 2
+fi
 
 get_value() {
   local key="$1"
-  grep -E "^- ${key}:" "$AUTOMATION_FILE" | head -n 1 | sed -E "s/^- ${key}:[[:space:]]*//"
+  grep -E "^- ${key}:" "$AUTOMATION_FILE" | head -n 1 | sed -E "s/^- ${key}:[[:space:]]*//" || true
 }
 
-run_optional_stage() {
+run_stage_with_intent_fallback() {
   local stage="$1"
   local cmd="$2"
+  local intent="$3"
+  local goal="$4"
   if [ "$cmd" = "unset" ]; then
-    "$STATE_HOOK" checkpoint "$stage" "skip (unset)"
-    return 0
+    "$STATE_HOOK" checkpoint "$stage" "engine-intent: ${intent}"
+    if "$ENGINE_HOOK" "$intent" "$goal"; then
+      "$STATE_HOOK" checkpoint "$stage" "ok (engine-intent)"
+      return 0
+    fi
+    "$STATE_HOOK" fail "stage=${stage}"
+    return 2
   fi
 
   "$STATE_HOOK" checkpoint "$stage" "run: $cmd"
@@ -50,11 +72,57 @@ run_optional_stage() {
 }
 
 run_validate_stage() {
+  local max_fix_attempts="$1"
+  local implement_cmd="$2"
   "$STATE_HOOK" checkpoint "validate" "run gates"
-  if "$GATE_HOOK" push; then
+  local attempt=1
+  while [ "$attempt" -le "$max_fix_attempts" ]; do
+    if "$GATE_HOOK" push; then
+      return 0
+    fi
+
+    failed_gate=$(jq -r '.last_gate // ""' "$STATE_FILE")
+    [ -z "$failed_gate" ] && failed_gate="unknown"
+    fix_key="${failed_gate}_fix_cmd"
+    fix_cmd="$(get_value "$fix_key")"
+    if [ -z "$fix_cmd" ] || [ "$fix_cmd" = "unset" ]; then
+      if [ "$implement_cmd" != "unset" ]; then
+        fix_cmd="$implement_cmd"
+      else
+        fix_cmd=".claude/hooks/suggest-automation-gates.sh"
+      fi
+    fi
+
+    "$STATE_HOOK" checkpoint "fix" "gate=${failed_gate} attempt=${attempt} cmd=${fix_cmd}"
+    if ! eval "$fix_cmd"; then
+      "$STATE_HOOK" fail "stage=fix gate=${failed_gate} attempt=${attempt}"
+      return 2
+    fi
+
+    attempt=$((attempt + 1))
+  done
+
+  "$STATE_HOOK" fail "stage=validate retries_exceeded"
+  return 2
+}
+
+run_quality_stage() {
+  "$STATE_HOOK" checkpoint "quality" "run quality gates"
+  if "$QUALITY_HOOK" push; then
+    "$STATE_HOOK" checkpoint "quality" "ok"
     return 0
   fi
-  "$STATE_HOOK" fail "stage=validate"
+  "$STATE_HOOK" fail "stage=quality"
+  return 2
+}
+
+run_release_stage() {
+  "$STATE_HOOK" checkpoint "release" "run release stage"
+  if "$RELEASE_HOOK"; then
+    "$STATE_HOOK" checkpoint "release" "ok"
+    return 0
+  fi
+  "$STATE_HOOK" fail "stage=release"
   return 2
 }
 
@@ -63,20 +131,28 @@ run_sequence_from() {
   local plan_cmd="$2"
   local implement_cmd="$3"
   local review_cmd="$4"
+  local goal="$5"
+  local max_fix_attempts="$6"
 
   local stages=()
   case "$start_stage" in
     plan)
-      stages=(plan implement validate review)
+      stages=(plan implement validate review quality release)
       ;;
     implement)
-      stages=(implement validate review)
+      stages=(implement validate review quality release)
       ;;
     validate)
-      stages=(validate review)
+      stages=(validate review quality release)
       ;;
     review)
-      stages=(review)
+      stages=(review quality release)
+      ;;
+    quality)
+      stages=(quality release)
+      ;;
+    release)
+      stages=(release)
       ;;
     *)
       echo "run-autopilot 실패: 알 수 없는 stage='$start_stage'" >&2
@@ -88,16 +164,22 @@ run_sequence_from() {
   for stage in "${stages[@]}"; do
     case "$stage" in
       plan)
-        run_optional_stage "plan" "$plan_cmd" || return 2
+        run_stage_with_intent_fallback "plan" "$plan_cmd" "plan" "$goal" || return 2
         ;;
       implement)
-        run_optional_stage "implement" "$implement_cmd" || return 2
+        run_stage_with_intent_fallback "implement" "$implement_cmd" "build" "$goal" || return 2
         ;;
       validate)
-        run_validate_stage || return 2
+        run_validate_stage "$max_fix_attempts" "$implement_cmd" || return 2
         ;;
       review)
-        run_optional_stage "review" "$review_cmd" || return 2
+        run_stage_with_intent_fallback "review" "$review_cmd" "review" "$goal" || return 2
+        ;;
+      quality)
+        run_quality_stage || return 2
+        ;;
+      release)
+        run_release_stage || return 2
         ;;
     esac
   done
@@ -108,6 +190,7 @@ shift || true
 GOAL="${*:-autopilot-goal}"
 
 max_cycles=$(get_value "max_autopilot_cycles")
+max_fix_attempts=$(get_value "max_fix_attempts_per_gate")
 plan_cmd=$(get_value "plan_cmd")
 implement_cmd=$(get_value "implement_cmd")
 review_cmd=$(get_value "review_cmd")
@@ -146,7 +229,7 @@ esac
 
 while [ "$cycle" -le "$max_cycles" ]; do
   "$STATE_HOOK" cycle "$cycle"
-  if run_sequence_from "$start_stage" "$plan_cmd" "$implement_cmd" "$review_cmd"; then
+  if run_sequence_from "$start_stage" "$plan_cmd" "$implement_cmd" "$review_cmd" "$GOAL" "$max_fix_attempts"; then
     "$STATE_HOOK" complete
     echo "run-autopilot: completed (cycle=$cycle)"
     exit 0
@@ -155,7 +238,7 @@ while [ "$cycle" -le "$max_cycles" ]; do
   cycle=$((cycle + 1))
   start_stage="$(jq -r '.last_stage // "implement"' "$STATE_FILE")"
   case "$start_stage" in
-    plan|implement|validate|review) ;;
+    plan|implement|validate|review|quality|release) ;;
     *) start_stage="implement" ;;
   esac
 done
