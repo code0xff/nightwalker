@@ -45,12 +45,13 @@ cp -r .claude/ /path/to/your-project/.claude/
 | `workflow.md` | 워크플로우, 문서 계층, workstream 규칙 |
 | `autonomy.md` | 자율 실행 범위, 사용자 확인 경계, 에스컬레이션 |
 
-### Skills (7개) — 실행 워크플로우
+### Skills (8개) — 실행 워크플로우
 
 | 스킬 | 역할 |
 |------|------|
 | `/plan` | 구현 전 설계 및 계획 수립 |
 | `/init-harness` | 프로젝트 시작 시 엔진/모델/게이트 고정 |
+| `/init-project` | 목표/스택 대화형 온보딩 후 개발 시작 문서 생성 |
 | `/autopilot` | 목표 기반 end-to-end 자동 실행 |
 | `/workstream` | Workstream 시작~종료 오케스트레이션 |
 | `/codex-review` | 구현 완료 후 외부 Codex CLI 반복 리뷰 |
@@ -60,7 +61,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 ### 라이프사이클
 
 ```
-/init-harness → /plan → /workstream (구현 + 리뷰 포함) → (push)
+/init-project → /plan → /workstream (구현 + 리뷰 포함) → (push)
 ```
 
 `/workstream`은 구현, 커밋, 코드 리뷰를 내부에서 순차 수행한다. 변경 크기에 따라 경량 리뷰(빌드+테스트만) 또는 전체 리뷰(`/codex-review` + `/self-review`)를 선택한다. 리뷰를 별도로 실행하려면 `/workstream` 없이 직접 호출한다.
@@ -70,7 +71,7 @@ cp -r .claude/ /path/to/your-project/.claude/
 복사 후 프로젝트에 맞게 추가할 것:
 
 - `docs/architecture.md` — 프로젝트 아키텍처 문서
-- `docs/roadmap/` — Workstream 정의와 deliverable
+- `docs/roadmap.md` — Workstream 단계별 목표와 deliverable
 - `.claude/project-profile.md` — 프로젝트 엔진/모델 고정값
 - `.claude/project-approvals.md` — 프로젝트 사전 승인 범위
 - `.claude/project-automation.md` — 자동화 모드/재시도/게이트 정책
@@ -111,6 +112,23 @@ cp -r .claude/ /path/to/your-project/.claude/
 이 명령은 gate/quality/engine adapter 기본값과 approvals allowlist를 자동으로 채운다.
 또한 completion contract를 현재 게이트 명령 기준으로 자동 연결한다.
 또한 stage/fix 기본 명령(`implement_cmd`, `review_cmd`, `*_fix_cmd`)을 자동 연결한다.
+
+새 프로젝트 온보딩(문서 생성 + 정책 검증 + ready 리포트)은 아래 명령으로 한 번에 수행한다.
+
+```bash
+.claude/hooks/run-project-onboarding.sh
+```
+
+온보딩 입력 상태는 `.devharness/session.yaml`에 저장된다.
+이 파일을 기준으로 아래 문서가 자동 생성된다.
+
+- `docs/project-goal.md`
+- `docs/scope.md`
+- `docs/architecture.md`
+- `docs/stack-decision.md`
+- `docs/roadmap.md`
+- `docs/execution-plan.md`
+- `ONBOARDING_READY.md`
 
 ## Non-Blocking Automation Policy
 

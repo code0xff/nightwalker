@@ -1,0 +1,12 @@
+schema_version: 1
+status: proposed
+project_goal: unset
+target_users: unset
+core_features: unset
+constraints: unset
+stack_candidate_1: unset
+stack_candidate_2: unset
+stack_candidate_3: unset
+selected_stack: unset
+open_questions: unset
+decisions: unset

@@ -43,6 +43,9 @@ cleanup() {
   cp "$AUTOMATION_BAK" .claude/project-automation.md
   cp "$APPROVALS_BAK" .claude/project-approvals.md
   rm -f .claude/state/autopilot-state.json
+  rm -f ONBOARDING_READY.md
+  rm -f docs/project-goal.md docs/scope.md docs/architecture.md docs/stack-decision.md docs/roadmap.md docs/execution-plan.md
+  rmdir docs 2>/dev/null || true
   rm -f "$AUTOMATION_BAK" "$APPROVALS_BAK"
 }
 
@@ -92,5 +95,9 @@ run_expect_ok "autopilot resume completed" .claude/hooks/run-autopilot.sh resume
 run_expect_ok "autopilot state completed" sh -c \
   'test "$(jq -r ".status" .claude/state/autopilot-state.json)" = "completed"'
 run_expect_ok "unset config report generated" .claude/hooks/report-unset-config.sh
+run_expect_ok "render onboarding docs" .claude/hooks/render-onboarding-docs.sh
+run_expect_ok "project onboarding flow" .claude/hooks/run-project-onboarding.sh
+run_expect_ok "onboarding ready report exists" test -f ONBOARDING_READY.md
+run_expect_ok "onboarding docs generated" test -f docs/project-goal.md
 
 pass "all harness regression checks"
