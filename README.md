@@ -13,7 +13,9 @@ curl -fsSL https://raw.githubusercontent.com/code0xff/dev-harness/main/scripts/b
 ```
 
 이 명령은 `dev-harness`를 자동으로 내려받아 실행 권한을 맞추고 온보딩 훅을 1회 실행한다.
-이후 Claude에서 `/init-project`를 실행해 목표/스택을 확정하고, 다시 온보딩 훅을 실행한다.
+이후 Claude에서 `/init-project`를 실행하면 목표/스택 확정과 문서/정책 동기화가 자동으로 완료된다.
+
+`session.yaml`을 수동으로 편집한 경우에만 아래 명령으로 동기화를 다시 실행한다.
 
 ```bash
 .claude/hooks/run-project-onboarding.sh

@@ -95,7 +95,8 @@ echo
 echo "bootstrap-project 완료"
 echo "- 다음 단계: Claude에서 /init-project 실행"
 if [ "$RUN_ONBOARDING" -eq 1 ]; then
-  echo "- 완료 후 .claude/hooks/run-project-onboarding.sh 를 한 번 더 실행해 status를 ready로 맞추세요"
+  echo "- /init-project가 완료되면 문서/정책 동기화까지 자동 처리됩니다"
+  echo "- 수동으로 session.yaml을 직접 수정한 경우에만 .claude/hooks/run-project-onboarding.sh 를 다시 실행하세요"
 fi
 
 if [ "$missing" -eq 1 ]; then
