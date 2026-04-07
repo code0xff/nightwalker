@@ -7,6 +7,7 @@ user-invocable: true
 # Plan
 
 구현을 시작하기 전에 요구사항을 분석하고, 설계 대안을 비교하고, 구현 계획을 수립한다.
+workstream 기반 프로젝트에서는 현재 workstream만 보는 것이 아니라 roadmap의 모든 workstream 설계와 의존 관계를 먼저 확정한다.
 사용자와 계획을 정렬한 후 구현을 진행한다.
 
 ## 1. 요구사항 분석
@@ -43,16 +44,18 @@ user-invocable: true
 - 각 단계에서 변경할 파일/모듈
 - 각 단계의 검증 방법 (테스트, 빌드)
 - 예상되는 커밋 단위
+- roadmap/workstream이 있으면 모든 workstream의 목표, 순서, 선행 의존성, 종료 조건
 - 새로 도입할 라이브러리가 있으면 후보를 조사하고, 선정 근거와 함께 문서에 확정한다 (dependencies.md "Library Selection" 참조)
 
 ### 계획 수립 시 원칙
 - 의존되는 쪽을 먼저 구현한다.
 - 각 단계가 끝나면 빌드와 테스트가 통과하는 상태여야 한다.
-- workstream이 있는 프로젝트에서는 현재 workstream 범위를 넘지 않는다.
+- workstream이 있는 프로젝트에서는 roadmap 전체를 설계하되, 구현 계획은 workstream 순서대로 분해한다.
 
 ## 4. 사용자 확인
 
-계획을 사용자에게 다음 형식으로 보고하고, 확인을 받은 후 구현을 시작한다.
+기본 모드에서는 계획을 사용자에게 다음 형식으로 보고하고 구현 전 정렬한다.
+단, `project-automation.md`에서 `automation_mode: full-auto`이고 `allow_midway_user_prompt: false`이면 별도 승인 대기 없이 roadmap 전체 계획을 확정하고 다음 구현 단계로 진행한다.
 
 ### 목표 및 제약
 (정리된 목표와 제약)
@@ -61,15 +64,15 @@ user-invocable: true
 (선택한 방식과 이유. 대안이 있었으면 비교 요약)
 
 ### 구현 계획
-(번호가 매겨진 단계별 목록)
+(번호가 매겨진 단계별 목록. workstream 기반 프로젝트라면 모든 workstream이 포함되어야 한다.)
 
 ### 불확실한 점
 (추가 확인이 필요한 사항. 없으면 `없음`)
 
-사용자가 계획을 승인하면 구현을 시작한다. 수정 요청이 있으면 계획을 조정한 후 재확인한다.
+중간 승인이 허용된 모드에서는 사용자가 계획을 승인하면 구현을 시작한다. 수정 요청이 있으면 계획을 조정한 후 재확인한다.
 
 ## /workstream와의 관계
 
-- `/plan`은 설계와 계획을 수립하고, `/workstream`은 계획을 실행한다.
-- workstream 기반 프로젝트에서는 `/plan`으로 설계를 확정한 후, `/workstream`으로 실행을 시작하는 흐름을 권장한다.
+- `/plan`은 roadmap 전체의 설계와 구현 계획을 수립하고, `/workstream`은 각 workstream을 그 계획 순서대로 실행한다.
+- workstream 기반 프로젝트에서는 `/plan`으로 모든 workstream 설계를 확정한 후, `/workstream` 또는 `/autopilot`으로 실행을 시작한다.
 - `/plan`은 단독으로도 사용할 수 있다. workstream이 없는 프로젝트에서는 `/plan` 후 바로 구현한다.

@@ -42,6 +42,7 @@ run_expect_fail_pipe() {
 cleanup() {
   cp "$AUTOMATION_BAK" .claude/project-automation.md
   cp "$APPROVALS_BAK" .claude/project-approvals.md
+  cp "$SESSION_BAK" .devharness/session.yaml
   rm -f .claude/state/autopilot-state.json
   rm -f ONBOARDING_READY.md
   rm -f docs/project-goal.md docs/scope.md docs/architecture.md docs/stack-decision.md docs/roadmap.md docs/execution-plan.md
@@ -51,8 +52,10 @@ cleanup() {
 
 AUTOMATION_BAK="$(mktemp)"
 APPROVALS_BAK="$(mktemp)"
+SESSION_BAK="$(mktemp)"
 cp .claude/project-automation.md "$AUTOMATION_BAK"
 cp .claude/project-approvals.md "$APPROVALS_BAK"
+cp .devharness/session.yaml "$SESSION_BAK"
 trap cleanup EXIT
 
 run_expect_ok "hook syntax" sh -c 'find .claude/hooks -type f -name "*.sh" -print0 | xargs -0 -I{} bash -n "{}"'
@@ -97,6 +100,23 @@ run_expect_ok "autopilot state completed" sh -c \
 run_expect_ok "unset config report generated" .claude/hooks/report-unset-config.sh
 run_expect_ok "render onboarding docs" .claude/hooks/render-onboarding-docs.sh
 run_expect_ok "project onboarding flow" .claude/hooks/run-project-onboarding.sh
+run_expect_ok "onboarding auto-starts autopilot when ready" sh -c '
+cat > .devharness/session.yaml <<'"'"'EOF'"'"'
+schema_version: 1
+status: proposed
+project_goal: ci regression goal
+target_users: internal developers
+core_features: unset
+constraints: unset
+stack_candidate_1: unset
+stack_candidate_2: unset
+stack_candidate_3: unset
+selected_stack: bash
+open_questions: unset
+decisions: unset
+EOF
+.claude/hooks/run-project-onboarding.sh >/dev/null &&
+test "$(jq -r ".status" .claude/state/autopilot-state.json)" = "completed"'
 run_expect_ok "bootstrap project helper" scripts/bootstrap-project.sh --skip-onboarding
 run_expect_ok "bootstrap project standalone install" sh -c \
   'tmpdir=$(mktemp -d) && DEV_HARNESS_SOURCE="$PWD" scripts/bootstrap-project.sh "$tmpdir" --skip-onboarding && test -d "$tmpdir/.claude" && test -d "$tmpdir/.devharness" && rm -rf "$tmpdir"'

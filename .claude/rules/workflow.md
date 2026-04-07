@@ -41,6 +41,7 @@
 
 workstream 기반 개발을 하는 프로젝트에서 적용한다:
 
+- `/plan` 산출물은 roadmap에 정의된 모든 workstream의 목표, 의존성, 구현 순서, exit criteria를 포함해야 한다.
 - 현재 workstream에서 필요한 최소 인터페이스만 먼저 만든다.
 - 구현 전에 다음 workstream 기능을 미리 섞지 않는다.
 - 테스트 없이 핵심 계약이나 인터페이스를 추가하지 않는다.
@@ -48,6 +49,7 @@ workstream 기반 개발을 하는 프로젝트에서 적용한다:
 - roadmap workstream 범위를 넘어 구현하지 않는다.
 - Build 단계는 활성 프로파일의 `build_engine`으로 수행한다.
 - Plan 산출물 범위를 벗어나는 변경은 금지한다. 불가피한 경우 `/plan`을 다시 실행해 계획을 갱신한다.
+- `automation_mode: full-auto`에서는 roadmap 순서를 유지하는 범위 내에서 남은 workstream을 연속으로 구현할 수 있다.
 
 ## Autopilot Execution Rules
 

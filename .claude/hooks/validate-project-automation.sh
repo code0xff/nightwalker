@@ -14,6 +14,7 @@ required_keys=(
   "automation_mode"
   "allow_midway_user_prompt"
   "final_report_only"
+  "auto_start_autopilot_on_ready"
   "preapproval_enforcement"
   "risk_enforcement"
   "unresolved_config_enforcement"
@@ -71,7 +72,7 @@ if [ "$automation_mode" != "full-auto" ] && [ "$automation_mode" != "assisted-au
   exit 2
 fi
 
-for bool_key in allow_midway_user_prompt final_report_only run_gates_on_commit run_gates_on_push run_quality_on_commit run_quality_on_push enable_quality_gates allow_engine_stub execute_engine_commands; do
+for bool_key in allow_midway_user_prompt final_report_only auto_start_autopilot_on_ready run_gates_on_commit run_gates_on_push run_quality_on_commit run_quality_on_push enable_quality_gates allow_engine_stub execute_engine_commands; do
   val=$(get_value "$bool_key")
   if [ "$val" != "true" ] && [ "$val" != "false" ]; then
     echo "project-automation 검증 실패: ${bool_key}는 true 또는 false여야 합니다." >&2

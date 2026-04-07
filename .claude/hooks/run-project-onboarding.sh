@@ -11,6 +11,7 @@ PROFILE_HOOK=".claude/hooks/validate-project-profile.sh"
 APPROVALS_HOOK=".claude/hooks/validate-project-approvals.sh"
 AUTOMATION_HOOK=".claude/hooks/validate-project-automation.sh"
 CONTRACT_HOOK=".claude/hooks/validate-completion-contract.sh"
+AUTOPILOT_HOOK=".claude/hooks/run-autopilot.sh"
 
 require_hook() {
   local hook="$1"
@@ -66,6 +67,21 @@ set_status() {
   mv "${SESSION_FILE}.tmp" "$SESSION_FILE"
 }
 
+is_ready_for_execution() {
+  local goal users stack
+  goal="$(get_value project_goal)"
+  users="$(get_value target_users)"
+  stack="$(get_value selected_stack)"
+
+  if [ -z "$goal" ] || [ "$goal" = "unset" ] || \
+     [ -z "$users" ] || [ "$users" = "unset" ] || \
+     [ -z "$stack" ] || [ "$stack" = "unset" ]; then
+    return 1
+  fi
+
+  return 0
+}
+
 get_automation_value() {
   local key="$1"
   grep -E "^- ${key}:" "$AUTOMATION_FILE" | head -n 1 | sed -E "s/^- ${key}:[[:space:]]*//" || true
@@ -109,6 +125,42 @@ relax_gate_enforcement_if_unset() {
   fi
 }
 
+build_autopilot_goal() {
+  local goal users stack
+  goal="$(get_value project_goal)"
+  users="$(get_value target_users)"
+  stack="$(get_value selected_stack)"
+
+  echo "${goal} [target_users=${users}; selected_stack=${stack}; execution_mode=plan_all_workstreams_then_build_sequentially]"
+}
+
+maybe_start_autopilot() {
+  local previous_status="$1"
+  local auto_start goal
+  auto_start="$(get_automation_value auto_start_autopilot_on_ready)"
+
+  if [ "$auto_start" != "true" ]; then
+    return 0
+  fi
+  if [ "${AUTOPILOT_ACTIVE:-false}" = "true" ]; then
+    return 0
+  fi
+  if [ "$previous_status" = "ready" ]; then
+    return 0
+  fi
+  if ! is_ready_for_execution; then
+    return 0
+  fi
+  if [ ! -x "$AUTOPILOT_HOOK" ]; then
+    echo "run-project-onboarding 실패: 실행 권한이 없는 hook: $AUTOPILOT_HOOK" >&2
+    exit 2
+  fi
+
+  goal="$(build_autopilot_goal)"
+  echo "run-project-onboarding: onboarding ready, starting autopilot."
+  "$AUTOPILOT_HOOK" start "$goal"
+}
+
 render_ready_report() {
   local goal users stack status
   goal="$(get_value project_goal)"
@@ -116,9 +168,7 @@ render_ready_report() {
   stack="$(get_value selected_stack)"
   status="ready"
 
-  if [ -z "$goal" ] || [ "$goal" = "unset" ] || \
-     [ -z "$users" ] || [ "$users" = "unset" ] || \
-     [ -z "$stack" ] || [ "$stack" = "unset" ]; then
+  if ! is_ready_for_execution; then
     status="pending-input"
   fi
 
@@ -144,7 +194,8 @@ render_ready_report() {
 
 ## Next Action
 
-- Run /plan with the approved goal and selected stack.
+- If status is ready, autopilot starts automatically and plans all roadmap workstreams before building them in order.
+- If status is pending-input, fill project_goal, target_users, and selected_stack first.
 EOF2
 
   if [ "$status" = "pending-input" ]; then
@@ -161,6 +212,7 @@ require_hook "$AUTOMATION_HOOK"
 require_hook "$CONTRACT_HOOK"
 
 ensure_session_file
+previous_status="$(get_value status)"
 
 "$SUGGEST_HOOK" >/dev/null
 "$BOOTSTRAP_HOOK" >/dev/null
@@ -171,6 +223,7 @@ relax_gate_enforcement_if_unset
 "$CONTRACT_HOOK"
 "$RENDER_HOOK" >/dev/null
 render_ready_report
+maybe_start_autopilot "$previous_status"
 
 echo "run-project-onboarding 완료: 문서/정책/검증이 최신화되었습니다."
 exit 0

@@ -204,6 +204,7 @@ fi
 set_automation_key "quality_coverage_cmd" "$quality_coverage_cmd"
 set_automation_key "quality_perf_cmd" "$quality_perf_cmd"
 set_automation_key "quality_architecture_cmd" "$quality_architecture_cmd"
+set_automation_if_unset "auto_start_autopilot_on_ready" "true"
 
 # 3) engine adapter 커맨드 자동 설정
 if command -v codex >/dev/null 2>&1; then

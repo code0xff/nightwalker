@@ -8,6 +8,7 @@
 - automation_mode: full-auto
 - allow_midway_user_prompt: false
 - final_report_only: true
+- auto_start_autopilot_on_ready: true
 - preapproval_enforcement: report
 - risk_enforcement: report
 - unresolved_config_enforcement: report

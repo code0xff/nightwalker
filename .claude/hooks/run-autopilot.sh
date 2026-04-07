@@ -269,6 +269,7 @@ run_sequence_from() {
 ACTION="${1:-start}"
 shift || true
 GOAL="${*:-autopilot-goal}"
+export AUTOPILOT_ACTIVE="true"
 
 max_cycles=$(get_value "max_autopilot_cycles")
 max_fix_attempts=$(get_value "max_fix_attempts_per_gate")

@@ -12,7 +12,7 @@ user-invocable: true
 
 - 프로젝트 목표/대상 사용자/핵심 기능/제약을 확정한다.
 - 기술 스택 3안을 비교하고 사용자 선택으로 최종 스택을 확정한다.
-- 문서 6종과 하네스 정책 파일을 최신화해 바로 `/plan`으로 넘어갈 수 있게 만든다.
+- 문서 6종과 하네스 정책 파일을 최신화해, 준비가 끝나면 `/autopilot`이 자동으로 `plan -> build`를 이어서 실행할 수 있게 만든다.
 
 ## 실행 순서
 
@@ -46,4 +46,5 @@ user-invocable: true
 
 - `ONBOARDING_READY.md`가 생성된다.
 - `status`가 `ready` 또는 `proposed`로 갱신된다.
+- `status=ready`이고 `auto_start_autopilot_on_ready=true`면 autopilot이 자동으로 시작된다.
 - 미확정 항목이 남으면 사용자에게 어떤 값을 확정해야 하는지 명확히 안내한다.

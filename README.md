@@ -13,7 +13,7 @@ curl -fsSL https://raw.githubusercontent.com/code0xff/dev-harness/main/scripts/b
 ```
 
 이 명령은 `dev-harness`를 자동으로 내려받아 실행 권한을 맞추고 온보딩 훅을 1회 실행한다.
-이후 Claude에서 `/init-project`를 실행하면 목표/스택 확정과 문서/정책 동기화가 자동으로 완료된다.
+이후 Claude에서 `/init-project`를 실행하면 목표/스택 확정과 문서/정책 동기화가 자동으로 완료되고, 준비가 끝나면 autopilot이 `/plan -> build`를 이어서 수행한다.
 
 `session.yaml`을 수동으로 편집한 경우에만 아래 명령으로 동기화를 다시 실행한다.
 
@@ -80,9 +80,10 @@ cp -r .devharness/ /path/to/your-project/.devharness/
 ### 라이프사이클
 
 ```
-/init-project → /plan → /workstream (구현 + 리뷰 포함) → (push)
+/init-project → /autopilot
 ```
 
+`/autopilot`의 첫 단계인 `/plan`은 roadmap의 모든 workstream을 먼저 설계하고, 이후 build 단계가 그 순서대로 구현을 이어간다.
 `/workstream`은 구현, 커밋, 코드 리뷰를 내부에서 순차 수행한다. 변경 크기에 따라 경량 리뷰(빌드+테스트만) 또는 전체 리뷰(`/codex-review` + `/self-review`)를 선택한다. 리뷰를 별도로 실행하려면 `/workstream` 없이 직접 호출한다.
 
 ## 프로젝트별 확장

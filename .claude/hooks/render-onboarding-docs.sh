@@ -107,35 +107,51 @@ DOC
 cat > "$DOCS_DIR/roadmap.md" <<DOC
 # Roadmap
 
-## Phase 1
+## Workstream 1
 
-- Finalize requirements and API contracts
-- Build MVP skeleton and core flows
+- Goal: finalize requirements, boundaries, and API/data contracts
+- Deliverables: architecture baseline, contract definitions, repository skeleton
+- Exit Criteria: interfaces are documented and implementation can begin without open blockers
 
-## Phase 2
+## Workstream 2
 
-- Add reliability checks and observability baseline
-- Harden security and failure handling paths
+- Goal: implement the MVP core flow end-to-end on the selected stack
+- Deliverables: primary use-case path, persistence wiring, integration path
+- Exit Criteria: the main user flow works and core tests pass
 
-## Phase 3
+## Workstream 3
 
-- Release readiness validation and deployment runbook
+- Goal: harden quality, security, and release readiness
+- Deliverables: automation gates, regression coverage, release checklist
+- Exit Criteria: quality gates pass and the project is ready for release validation
 DOC
 
 cat > "$DOCS_DIR/execution-plan.md" <<DOC
 # Execution Plan
 
-## Workstream 1
+## Global Plan
 
-- Define data model and API contract
+- Design all roadmap workstreams before implementation starts
+- Execute workstreams sequentially in roadmap order
+- Re-run plan only when roadmap scope or architecture decisions change
 
-## Workstream 2
+## Workstream 1 Plan
 
-- Implement core use-case path end-to-end
+- Define domain model, repository boundaries, and API contracts
+- Create the minimum project skeleton required for downstream implementation
+- Validate assumptions that unblock Workstream 2
 
-## Workstream 3
+## Workstream 2 Plan
 
-- Add tests, quality gates, and release checks
+- Implement the main user journey end-to-end
+- Connect API, domain, and persistence layers
+- Add tests for the critical path and failure handling
+
+## Workstream 3 Plan
+
+- Add automation gates, regression checks, and release validation
+- Close security and operational readiness gaps
+- Prepare final quality/review pass for release
 DOC
 
 echo "render-onboarding-docs 완료: docs/*.md 생성"

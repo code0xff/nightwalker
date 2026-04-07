@@ -8,6 +8,7 @@
 
 - validate는 `project-automation.md`의 gate 명령을 따른다.
 - plan/implement/review는 `project-automation.md`의 `plan_cmd`, `implement_cmd`, `review_cmd`를 따른다.
+- full-auto 모드에서는 `/plan`이 roadmap 전체 workstream 설계를 먼저 확정하고, implement 단계는 그 순서를 따라 연속 실행한다.
 - stage 명령이 `unset`이면 `run-engine-intent.sh`로 profile 기반 엔진 어댑터를 실행한다.
 - strict runtime에서는 `check-engine-readiness.sh`를 통과해야 시작할 수 있다.
 - quality는 `quality_cmd`와 선택적인 `quality_coverage/perf/architecture` 명령을 따른다.

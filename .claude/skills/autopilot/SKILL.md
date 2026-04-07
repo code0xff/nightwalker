@@ -22,8 +22,8 @@ user-invocable: true
 
 ## 2. 자동 실행 루프
 
-1. `/plan`으로 실행 계획 확정
-2. 계획 범위 구현
+1. `/plan`으로 roadmap 전체 workstream 설계와 실행 계획 확정
+2. 계획된 workstream을 순서대로 구현
 3. gate 실행 (lint/build/test/security)
 4. `/self-review` + 외부 review 절차
 5. quality gate 실행
