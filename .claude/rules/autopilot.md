@@ -4,7 +4,7 @@
 
 ## Execution Loop
 
-`plan -> implement -> validate -> review -> quality -> repeat`
+`plan -> implement -> validate -> review -> quality -> qa -> delivery -> repeat`
 
 완료 직전에는 `delivery` 단계에서 done-check와 자동 커밋을 수행한다. push/배포는 기본적으로 개발 후 전략으로 분리한다.
 
@@ -14,6 +14,7 @@
 - stage 명령이 `unset`이면 `run-engine-intent.sh`로 profile 기반 엔진 어댑터를 실행한다.
 - strict runtime에서는 `check-engine-readiness.sh`를 통과해야 시작할 수 있다.
 - quality는 `quality_cmd`와 선택적인 `quality_coverage/perf/architecture` 명령을 따른다.
+- qa는 초기 요구사항 충족 여부를 검수하고, 실패 시 remediation workstream을 등록한 뒤 다음 cycle의 `/plan`으로 되돌린다.
 - gate 실패 시 원인 분석 후 자동 수정한다.
 - 수정 후 같은 gate를 재실행한다.
 - 검증이 끝난 변경은 `auto_commit_on_success=true`일 때 자동 커밋한다.

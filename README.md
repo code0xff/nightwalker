@@ -85,6 +85,7 @@ cp -r .devharness/ /path/to/your-project/.devharness/
 
 `/autopilot`의 첫 단계인 `/plan`은 roadmap의 모든 workstream을 먼저 설계하고, 이후 build 단계가 그 순서대로 구현을 이어간다.
 기본 `full-auto` 정책은 로컬 개발 완주와 자동 커밋까지를 범위로 두고, push/배포는 개발 후 별도 전략으로 분리한다.
+구현 후에는 QA 단계에서 초기 요구사항 충족 여부를 다시 검수하고, 문제가 나오면 remediation workstream을 등록해 같은 flow로 후속 개발을 이어간다.
 `/workstream`은 구현, 커밋, 코드 리뷰를 내부에서 순차 수행한다. 변경 크기에 따라 경량 리뷰(빌드+테스트만) 또는 전체 리뷰(`/codex-review` + `/self-review`)를 선택한다. 리뷰를 별도로 실행하려면 `/workstream` 없이 직접 호출한다.
 
 여기서 `roadmap`은 프로젝트 전체 순서와 범위를 정의하는 상위 계획이고, `workstream`은 그 roadmap을 구성하는 개별 실행 단위다. 작은 프로젝트는 `docs/roadmap.md` 하나로 충분하지만, 필요하면 `docs/workstreams/` 아래에 단계별 문서를 분리해도 된다.
@@ -197,6 +198,7 @@ stage 실행과 복구에는 fallback 체인이 적용된다.
 - `implement`: stage command → inferred command(build/test) → engine intent
 - `review`: stage command → inferred command(quality/test) → engine intent
 - gate fix: `<gate>_fix_cmd` → gate command → `implement_cmd` → gate 재감지
+- qa: requirement QA → remediation workstream registration on failure
 - delivery: done-check → auto commit
 
 ## CI Enforcement

@@ -27,9 +27,11 @@ user-invocable: true
 3. gate 실행 (lint/build/test/security)
 4. `/self-review` + 외부 review 절차
 5. quality gate 실행
-6. `delivery` 단계에서 done-check와 자동 커밋 수행
-7. 실패 시 fix 단계 실행 후 gate 재검증
-8. 완료 기준 충족 시 종료, 미충족 시 루프 반복
+6. QA 단계에서 초기 요구사항 충족 여부 검수
+7. QA 실패 시 remediation workstream을 등록하고 다음 cycle에서 같은 flow로 해결
+8. `delivery` 단계에서 done-check와 자동 커밋 수행
+9. 실패 시 fix 단계 실행 후 gate 재검증
+10. 완료 기준 충족 시 종료, 미충족 시 루프 반복
 
 각 단계 전후로 `.claude/hooks/autopilot-state.sh checkpoint ...`를 기록하고,
 gate 결과는 `.claude/hooks/autopilot-state.sh gate ...`로 남긴다.

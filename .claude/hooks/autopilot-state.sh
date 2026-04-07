@@ -25,6 +25,9 @@ init_state_file() {
   "last_gate_result": "",
   "updated_at": "",
   "error": "",
+  "deferred_decisions": [],
+  "assumptions": [],
+  "manual_followups": [],
   "history": []
 }
 EOF
@@ -62,6 +65,14 @@ update_state() {
 
 init_state_file
 
+tmp="$(mktemp)"
+jq '
+  .deferred_decisions = (.deferred_decisions // [])
+  | .assumptions = (.assumptions // [])
+  | .manual_followups = (.manual_followups // [])
+' "$STATE_FILE" > "$tmp"
+mv "$tmp" "$STATE_FILE"
+
 ACTION="${1:-show}"
 shift || true
 
@@ -79,6 +90,9 @@ case "$ACTION" in
       | .last_gate = ""
       | .last_gate_result = ""
       | .error = ""
+      | .deferred_decisions = []
+      | .assumptions = []
+      | .manual_followups = []
       | .updated_at = $now
       | .history = [{"event":"start","stage":"plan","detail":"autopilot session started","at":$now}]
     '
@@ -105,6 +119,22 @@ case "$ACTION" in
     '
     append_event "gate" "$GATE_NAME" "$DETAIL"
     ;;
+  defer)
+    KIND="${1:-manual_followups}"
+    DETAIL="${2:-}"
+    NOW="$(timestamp_utc)"
+    case "$KIND" in
+      deferred_decisions|assumptions|manual_followups) ;;
+      *)
+        echo "autopilot-state 실패: 알 수 없는 defer kind='$KIND'" >&2
+        exit 2
+        ;;
+    esac
+    update_state --arg kind "$KIND" --arg detail "$DETAIL" --arg now "$NOW" '
+      .[$kind] += [{"detail": $detail, "at": $now}]
+    '
+    append_event "defer" "$KIND" "$DETAIL"
+    ;;
   fail)
     REASON="${1:-unknown}"
     update_state --arg reason "$REASON" '.status = "failed" | .error = $reason'
@@ -118,7 +148,7 @@ case "$ACTION" in
     cat "$STATE_FILE"
     ;;
   *)
-    echo "usage: $0 {start <goal>|cycle <n>|checkpoint <stage> [note]|gate <name> <pass|fail> [detail]|fail <reason>|complete|show}" >&2
+    echo "usage: $0 {start <goal>|cycle <n>|checkpoint <stage> [note]|gate <name> <pass|fail> [detail]|defer <deferred_decisions|assumptions|manual_followups> <detail>|fail <reason>|complete|show}" >&2
     exit 2
     ;;
 esac

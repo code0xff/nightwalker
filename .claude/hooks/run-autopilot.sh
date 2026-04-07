@@ -11,6 +11,7 @@ ENGINE_HOOK=".claude/hooks/run-engine-intent.sh"
 ENGINE_READY_HOOK=".claude/hooks/check-engine-readiness.sh"
 UNSET_REPORT_HOOK=".claude/hooks/report-unset-config.sh"
 DONE_CHECK_HOOK=".claude/hooks/run-done-check.sh"
+QA_REGISTER_HOOK=".claude/hooks/register-qa-workstream.sh"
 
 if [ ! -f "$AUTOMATION_FILE" ]; then
   echo "run-autopilot 실패: $AUTOMATION_FILE 파일이 없습니다." >&2
@@ -49,6 +50,10 @@ if [ ! -x "$UNSET_REPORT_HOOK" ]; then
 fi
 if [ ! -x "$DONE_CHECK_HOOK" ]; then
   echo "run-autopilot 실패: $DONE_CHECK_HOOK 실행 권한이 필요합니다." >&2
+  exit 2
+fi
+if [ ! -x "$QA_REGISTER_HOOK" ]; then
+  echo "run-autopilot 실패: $QA_REGISTER_HOOK 실행 권한이 필요합니다." >&2
   exit 2
 fi
 
@@ -244,6 +249,31 @@ run_quality_stage() {
   return 2
 }
 
+run_qa_stage() {
+  local goal="$1"
+  local qa_cmd="$2"
+
+  if [ "$qa_cmd" = "unset" ]; then
+    "$STATE_HOOK" checkpoint "qa" "skip (qa_cmd unset)"
+    return 0
+  fi
+
+  "$STATE_HOOK" checkpoint "qa" "run qa"
+  if eval "$qa_cmd"; then
+    "$STATE_HOOK" checkpoint "qa" "ok"
+    return 0
+  fi
+
+  "$STATE_HOOK" checkpoint "qa" "register remediation workstream"
+  if "$QA_REGISTER_HOOK" "$goal"; then
+    "$STATE_HOOK" checkpoint "plan" "qa remediation workstream registered"
+    return 1
+  fi
+
+  "$STATE_HOOK" fail "stage=qa"
+  return 2
+}
+
 run_delivery_stage() {
   local goal="$1"
   local unset_enforcement="$2"
@@ -265,6 +295,7 @@ run_delivery_stage() {
   if [ "$unset_enforcement" = "report" ] && echo "$unset_report" | grep -q '^unset_count=[1-9]'; then
     echo "run-autopilot 보고: 미확정 설정이 남아 있습니다." >&2
     echo "$unset_report" >&2
+    "$STATE_HOOK" defer manual_followups "unset-config: $(echo "$unset_report" | tr '\n' ' ' | sed 's/[[:space:]]\+/ /g')" >/dev/null 2>&1 || true
   fi
 
   if [ "${AUTOPILOT_SKIP_VCS_WRITE:-false}" = "true" ]; then
@@ -298,9 +329,11 @@ run_delivery_stage() {
       git push
     else
       "$STATE_HOOK" checkpoint "delivery" "skip push (no upstream branch configured)"
+      "$STATE_HOOK" defer manual_followups "push skipped: no upstream branch configured" >/dev/null 2>&1 || true
     fi
   else
     "$STATE_HOOK" checkpoint "delivery" "skip push (post-development strategy)"
+    "$STATE_HOOK" defer manual_followups "push/deploy strategy deferred until after local completion" >/dev/null 2>&1 || true
   fi
 
   return 0
@@ -311,25 +344,29 @@ run_sequence_from() {
   local plan_cmd="$2"
   local implement_cmd="$3"
   local review_cmd="$4"
-  local goal="$5"
-  local max_fix_attempts="$6"
+  local qa_cmd="$5"
+  local goal="$6"
+  local max_fix_attempts="$7"
 
   local stages=()
   case "$start_stage" in
     plan)
-      stages=(plan implement validate review quality delivery)
+      stages=(plan implement validate review quality qa delivery)
       ;;
     implement)
-      stages=(implement validate review quality delivery)
+      stages=(implement validate review quality qa delivery)
       ;;
     validate)
-      stages=(validate review quality delivery)
+      stages=(validate review quality qa delivery)
       ;;
     review)
-      stages=(review quality delivery)
+      stages=(review quality qa delivery)
       ;;
     quality)
-      stages=(quality delivery)
+      stages=(quality qa delivery)
+      ;;
+    qa)
+      stages=(qa delivery)
       ;;
     delivery)
       stages=(delivery)
@@ -358,6 +395,9 @@ run_sequence_from() {
       quality)
         run_quality_stage || return 2
         ;;
+      qa)
+        run_qa_stage "$goal" "$qa_cmd" || return 2
+        ;;
       delivery)
         run_delivery_stage "$goal" "$UNSET_ENFORCEMENT" || return 2
         ;;
@@ -378,6 +418,7 @@ UNSET_ENFORCEMENT="$unset_enforcement"
 plan_cmd=$(get_value "plan_cmd")
 implement_cmd=$(get_value "implement_cmd")
 review_cmd=$(get_value "review_cmd")
+qa_cmd=$(get_value "qa_cmd")
 
 cycle=1
 start_stage="plan"
@@ -415,7 +456,7 @@ esac
 
 while [ "$cycle" -le "$max_cycles" ]; do
   "$STATE_HOOK" cycle "$cycle"
-  if run_sequence_from "$start_stage" "$plan_cmd" "$implement_cmd" "$review_cmd" "$GOAL" "$max_fix_attempts"; then
+  if run_sequence_from "$start_stage" "$plan_cmd" "$implement_cmd" "$review_cmd" "$qa_cmd" "$GOAL" "$max_fix_attempts"; then
     "$STATE_HOOK" complete
     echo "run-autopilot: completed (cycle=$cycle)"
     exit 0
@@ -424,7 +465,7 @@ while [ "$cycle" -le "$max_cycles" ]; do
   cycle=$((cycle + 1))
   start_stage="$(jq -r '.last_stage // "implement"' "$STATE_FILE")"
   case "$start_stage" in
-    plan|implement|validate|review|quality|delivery) ;;
+    plan|implement|validate|review|quality|qa|delivery) ;;
     *) start_stage="implement" ;;
   esac
 done

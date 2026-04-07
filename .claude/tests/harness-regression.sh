@@ -44,8 +44,10 @@ cleanup() {
   cp "$APPROVALS_BAK" .claude/project-approvals.md
   cp "$SESSION_BAK" .devharness/session.yaml
   rm -f .claude/state/autopilot-state.json
+  rm -f .claude/state/qa-report.md
   rm -f ONBOARDING_READY.md
   rm -f docs/project-goal.md docs/scope.md docs/architecture.md docs/stack-decision.md docs/roadmap.md docs/execution-plan.md
+  rm -rf docs/workstreams
   rmdir docs 2>/dev/null || true
   rm -f "$AUTOMATION_BAK" "$APPROVALS_BAK"
 }
@@ -91,6 +93,8 @@ run_expect_ok "quality gates push" .claude/hooks/run-quality-gates.sh push
 run_expect_ok "engine readiness check" .claude/hooks/check-engine-readiness.sh
 run_expect_ok "engine intent fallback plan" sh -c \
   'DEV_HARNESS_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "ci-intent"'
+run_expect_ok "qa check test mode" sh -c \
+  'DEV_HARNESS_TEST_MODE=true .claude/hooks/run-qa-check.sh "ci-qa" >/dev/null'
 run_expect_ok "done check report-only" .claude/hooks/run-done-check.sh
 
 run_expect_ok "autopilot start" sh -c \
@@ -100,8 +104,25 @@ run_expect_ok "autopilot resume completed" sh -c \
 
 run_expect_ok "autopilot state completed" sh -c \
   'test "$(jq -r ".status" .claude/state/autopilot-state.json)" = "completed"'
+run_expect_ok "autopilot followups recorded" sh -c \
+  'test "$(jq ".manual_followups | length" .claude/state/autopilot-state.json)" -ge 1'
 run_expect_ok "unset config report generated" .claude/hooks/report-unset-config.sh
 run_expect_ok "render onboarding docs" .claude/hooks/render-onboarding-docs.sh
+run_expect_ok "qa workstream registration" sh -c '
+cat > .claude/state/qa-report.md <<'"'"'EOF'"'"'
+# QA Report
+- status: fail
+- summary: coverage gap found
+## Requirement Coverage
+- some requirement is missing
+## Findings
+- [severity:medium] missing requirement coverage
+## Follow Up Workstreams
+- QA workstream: resolve missing requirement coverage
+EOF
+.claude/hooks/register-qa-workstream.sh "ci-qa" >/dev/null &&
+test -d docs/workstreams &&
+test "$(find docs/workstreams -type f | wc -l | tr -d " ")" -ge 1'
 run_expect_ok "project onboarding flow" .claude/hooks/run-project-onboarding.sh
 run_expect_ok "onboarding auto-starts autopilot when ready" sh -c '
 cat > .devharness/session.yaml <<'"'"'EOF'"'"'

@@ -54,6 +54,7 @@ workstream 기반 개발을 하는 프로젝트에서 적용한다:
 - Build 단계는 활성 프로파일의 `build_engine`으로 수행한다.
 - Plan 산출물 범위를 벗어나는 변경은 금지한다. 불가피한 경우 `/plan`을 다시 실행해 계획을 갱신한다.
 - `automation_mode: full-auto`에서는 roadmap 순서를 유지하는 범위 내에서 남은 workstream을 연속으로 구현할 수 있다.
+- QA에서 remediation workstream이 등록되면 roadmap의 후속 workstream으로 추가하고, 다음 cycle에서 `/plan`부터 다시 정렬한다.
 
 ## Autopilot Execution Rules
 

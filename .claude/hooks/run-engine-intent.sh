@@ -29,6 +29,38 @@ shell_quote() {
   printf "%q" "$1"
 }
 
+validate_intent_artifact() {
+  local intent="$1"
+  local artifact="$2"
+  local required=()
+
+  case "$intent" in
+    plan)
+      required=("## Goal And Constraints" "## Approach" "## Implementation Plan" "## Uncertainties")
+      ;;
+    build)
+      required=("## Build Changes" "## Validation Results" "## Updated Files")
+      ;;
+    review)
+      required=("## Findings" "## Applied Fixes" "## User Follow Ups")
+      ;;
+  esac
+
+  if [ "${#required[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  local heading
+  for heading in "${required[@]}"; do
+    if ! grep -Fqx "$heading" "$artifact"; then
+      echo "engine-intent 실패: intent output contract 불충족 ($intent missing: $heading)" >&2
+      return 1
+    fi
+  done
+
+  return 0
+}
+
 INTENT="${1:-}"
 GOAL="${2:-autopilot-goal}"
 if [ "$INTENT" != "plan" ] && [ "$INTENT" != "build" ] && [ "$INTENT" != "review" ]; then
@@ -115,6 +147,7 @@ fi
 
 if command -v "$binary" >/dev/null 2>&1; then
   if eval "$cmd" >> "$artifact" 2>&1; then
+    validate_intent_artifact "$INTENT" "$artifact"
     exit 0
   fi
   if [ "$runtime_mode" = "strict" ] || [ "$allow_stub" != "true" ]; then

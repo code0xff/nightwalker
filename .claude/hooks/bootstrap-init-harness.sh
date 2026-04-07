@@ -136,6 +136,10 @@ command_prefix() {
   [ -z "${w1:-}" ] && return 0
 
   case "$w1" in
+    .claude/hooks/*)
+      echo "$w1"
+      return 0
+      ;;
     npm)
       if [ "${w2:-}" = "run" ] && [ -n "${w3:-}" ]; then
         echo "npm run $w3"
@@ -146,13 +150,27 @@ command_prefix() {
         return 0
       fi
       ;;
+    pnpm|yarn)
+      if [ "${w2:-}" = "run" ] && [ -n "${w3:-}" ]; then
+        echo "$w1 run $w3"
+        return 0
+      fi
+      if [ "${w2:-}" = "-r" ] && [ -n "${w3:-}" ]; then
+        echo "$w1 -r $w3"
+        return 0
+      fi
+      if [ "${w2:-}" = "test" ]; then
+        echo "$w1 test"
+        return 0
+      fi
+      ;;
     python|python3)
       if [ "${w2:-}" = "-m" ] && [ -n "${w3:-}" ]; then
         echo "$w1 -m $w3"
         return 0
       fi
       ;;
-    go|cargo|make|pytest|ruff|codex|claude)
+    go|cargo|make|pytest|ruff|codex|claude|pnpm)
       if [ -n "${w2:-}" ]; then
         echo "$w1 $w2"
       else
@@ -240,6 +258,7 @@ if [ "$quality_cmd" != "unset" ]; then
 elif [ "$test_cmd" != "unset" ]; then
   set_automation_if_unset "review_cmd" "$test_cmd"
 fi
+set_automation_if_unset "qa_cmd" '.claude/hooks/run-qa-check.sh "${AUTOPILOT_GOAL:-autopilot-goal}"'
 if [ "$build_cmd" != "unset" ]; then
   set_automation_if_unset "build_fix_cmd" "$build_cmd"
 fi
@@ -260,7 +279,7 @@ ensure_allowlist_item "git add"
 ensure_allowlist_item "git commit"
 ensure_allowlist_item "git push"
 
-for key in lint_cmd build_cmd test_cmd plan_cmd implement_cmd review_cmd quality_coverage_cmd quality_perf_cmd quality_architecture_cmd; do
+for key in lint_cmd build_cmd test_cmd plan_cmd implement_cmd review_cmd qa_cmd quality_coverage_cmd quality_perf_cmd quality_architecture_cmd; do
   cmd="$(get_automation_value "$key")"
   prefix="$(command_prefix "$cmd" || true)"
   if [ -n "${prefix:-}" ]; then

@@ -65,6 +65,50 @@ detect_from_node() {
   printf '%s%s%s%s%s%s%s\n' "$lint" "$SEP" "$build" "$SEP" "$test" "$SEP" "$security"
 }
 
+detect_from_node_workspaces() {
+  local lint="unset"
+  local build="unset"
+  local test="unset"
+  local security="unset"
+
+  if [ -f package.json ] && command -v jq >/dev/null 2>&1; then
+    if jq -e '.workspaces' package.json >/dev/null 2>&1; then
+      if jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
+        lint="npm run lint"
+      else
+        lint="npm run --workspaces --if-present lint"
+      fi
+
+      if jq -e '.scripts.build' package.json >/dev/null 2>&1; then
+        build="npm run build"
+      else
+        build="npm run --workspaces --if-present build"
+      fi
+
+      if jq -e '.scripts.test' package.json >/dev/null 2>&1; then
+        test="npm test"
+      else
+        test="npm run --workspaces --if-present test"
+      fi
+
+      if jq -e '.scripts.security' package.json >/dev/null 2>&1; then
+        security="npm run security"
+      elif jq -e '.workspaces' package.json >/dev/null 2>&1; then
+        security="npm audit --workspaces --audit-level=high"
+      fi
+    fi
+  fi
+
+  if [ -f pnpm-workspace.yaml ]; then
+    [ "$lint" = "unset" ] && lint="pnpm -r lint"
+    [ "$build" = "unset" ] && build="pnpm -r build"
+    [ "$test" = "unset" ] && test="pnpm -r test"
+    [ "$security" = "unset" ] && security="pnpm audit"
+  fi
+
+  printf '%s%s%s%s%s%s%s\n' "$lint" "$SEP" "$build" "$SEP" "$test" "$SEP" "$security"
+}
+
 detect_from_python() {
   local lint="unset"
   local build="unset"
@@ -144,7 +188,7 @@ build_cmd="unset"
 test_cmd="unset"
 security_cmd="unset"
 
-for detector in detect_from_make detect_from_node detect_from_python detect_from_go detect_from_rust detect_harness_fallback; do
+for detector in detect_from_make detect_from_node detect_from_node_workspaces detect_from_python detect_from_go detect_from_rust detect_harness_fallback; do
   IFS="$SEP" read -r d_lint d_build d_test d_security <<< "$($detector)"
   lint_cmd="$(choose_first_non_unset "$lint_cmd" "$d_lint")"
   build_cmd="$(choose_first_non_unset "$build_cmd" "$d_build")"

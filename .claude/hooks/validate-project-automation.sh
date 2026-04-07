@@ -29,6 +29,7 @@ required_keys=(
   "plan_cmd"
   "implement_cmd"
   "review_cmd"
+  "qa_cmd"
   "engine_cmd_codex"
   "engine_cmd_claude"
   "engine_cmd_openai"

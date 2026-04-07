@@ -5,6 +5,7 @@ set -euo pipefail
 APPROVALS_FILE=".claude/project-approvals.md"
 AUTOMATION_FILE=".claude/project-automation.md"
 WARN_FILE=".claude/state/policy-warnings.log"
+STATE_HOOK=".claude/hooks/autopilot-state.sh"
 
 if [ ! -f "$APPROVALS_FILE" ]; then
   echo "pre-approval 검증 실패: $APPROVALS_FILE 파일이 없습니다." >&2
@@ -70,6 +71,9 @@ warn_or_block() {
   local enforcement="$2"
   mkdir -p "$(dirname "$WARN_FILE")"
   printf '%s [%s] %s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "preapproval" "$msg" >> "$WARN_FILE"
+  if [ "${AUTOPILOT_ACTIVE:-false}" = "true" ] && [ -x "$STATE_HOOK" ]; then
+    "$STATE_HOOK" defer manual_followups "preapproval: $msg" >/dev/null 2>&1 || true
+  fi
   if [ "$enforcement" = "block" ]; then
     echo "$msg" >&2
     exit 2

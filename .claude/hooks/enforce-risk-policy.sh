@@ -5,6 +5,7 @@ set -euo pipefail
 AUTOMATION_FILE=".claude/project-automation.md"
 CLASSIFIER=".claude/hooks/classify-risk.sh"
 WARN_FILE=".claude/state/policy-warnings.log"
+STATE_HOOK=".claude/hooks/autopilot-state.sh"
 
 if [ ! -f "$AUTOMATION_FILE" ]; then
   echo "risk-policy 검증 실패: $AUTOMATION_FILE 파일이 없습니다." >&2
@@ -42,6 +43,9 @@ warn_or_block() {
   local enforcement="$2"
   mkdir -p "$(dirname "$WARN_FILE")"
   printf '%s [%s] %s\n' "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" "risk" "$msg" >> "$WARN_FILE"
+  if [ "${AUTOPILOT_ACTIVE:-false}" = "true" ] && [ -x "$STATE_HOOK" ]; then
+    "$STATE_HOOK" defer deferred_decisions "risk: $msg" >/dev/null 2>&1 || true
+  fi
   if [ "$enforcement" = "block" ]; then
     echo "$msg" >&2
     exit 2

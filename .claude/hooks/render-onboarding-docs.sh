@@ -133,6 +133,7 @@ cat > "$DOCS_DIR/execution-plan.md" <<DOC
 
 - Design all roadmap workstreams before implementation starts
 - Execute workstreams sequentially in roadmap order
+- Run requirement QA after implementation and register remediation workstreams if needed
 - Re-run plan only when roadmap scope or architecture decisions change
 
 ## Workstream 1 Plan

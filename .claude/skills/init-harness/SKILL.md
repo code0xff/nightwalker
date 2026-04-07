@@ -61,7 +61,7 @@ user-invocable: true
 - `engine_runtime_mode`, `allow_engine_stub` (엔진 실행 실패 시 stub 허용 정책)
 - `execute_engine_commands` (실제 엔진 CLI 실행 여부)
 - `max_fix_attempts_per_gate`, `max_autopilot_cycles`
-- `plan_cmd`, `implement_cmd`, `review_cmd` (자동 오케스트레이션 단계 명령)
+- `plan_cmd`, `implement_cmd`, `review_cmd`, `qa_cmd` (자동 오케스트레이션 단계 명령)
 - `engine_cmd_*` (엔진별 어댑터 명령 템플릿)
 - `lint_fix_cmd/build_fix_cmd/test_fix_cmd/security_fix_cmd` (gate 실패 자동 복구 명령)
 - lint/build/test/security gate 명령
