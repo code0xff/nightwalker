@@ -18,14 +18,14 @@
 
 ## Retry Policy
 
-- max_fix_attempts_per_gate: 3
-- max_autopilot_cycles: 8
+- max_fix_attempts_per_gate: 5
+- max_autopilot_cycles: 10
 
 ## Stage Commands
 
-- plan_cmd: unset
-- implement_cmd: unset
-- review_cmd: unset
+- plan_cmd: .claude/hooks/run-project-onboarding.sh && .claude/hooks/run-engine-intent.sh plan "${AUTOPILOT_GOAL:-autopilot-goal}"
+- implement_cmd: .claude/hooks/run-engine-intent.sh build "${AUTOPILOT_GOAL:-autopilot-goal}"
+- review_cmd: .claude/hooks/run-engine-intent.sh review "${AUTOPILOT_GOAL:-autopilot-goal}"
 
 ## Engine Adapter Commands (optional)
 
@@ -38,10 +38,10 @@
 
 ## Gate Fix Commands
 
-- lint_fix_cmd: unset
-- build_fix_cmd: unset
-- test_fix_cmd: unset
-- security_fix_cmd: unset
+- lint_fix_cmd: .claude/hooks/run-engine-intent.sh build "${AUTOPILOT_GOAL:-autopilot-goal}"
+- build_fix_cmd: .claude/hooks/run-engine-intent.sh build "${AUTOPILOT_GOAL:-autopilot-goal}"
+- test_fix_cmd: .claude/hooks/run-engine-intent.sh build "${AUTOPILOT_GOAL:-autopilot-goal}"
+- security_fix_cmd: .claude/hooks/run-engine-intent.sh build "${AUTOPILOT_GOAL:-autopilot-goal}"
 
 ## Gate Commands
 
