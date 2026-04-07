@@ -27,11 +27,28 @@ if [ "$execute_engine_commands" != "true" ]; then
   exit 0
 fi
 
+PLUGIN_CHECK=".claude/hooks/check-codex-plugin.sh"
+
 missing=0
 for engine_key in plan_engine build_engine review_engine; do
   engine="$(get_profile_value "$engine_key")"
   case "$engine" in
-    codex) bin="codex" ;;
+    codex)
+      # codex는 plugin → cli → claude fallback 순서로 확인
+      if [ -x "$PLUGIN_CHECK" ]; then
+        codex_mode="$("$PLUGIN_CHECK" check)"
+        if [ "$codex_mode" = "none" ]; then
+          # plugin도 cli도 없지만, claude가 있으면 fallback 가능
+          if ! command -v claude >/dev/null 2>&1; then
+            echo "engine-readiness: codex engine requires codex plugin, codex CLI, or claude CLI" >&2
+            missing=1
+          fi
+        fi
+      elif ! command -v codex >/dev/null 2>&1 && ! command -v claude >/dev/null 2>&1; then
+        echo "engine-readiness: missing binary for ${engine_key}=${engine}" >&2
+        missing=1
+      fi
+      ;;
     claude) bin="claude" ;;
     openai) bin="openai" ;;
     cursor) bin="cursor" ;;
@@ -40,7 +57,7 @@ for engine_key in plan_engine build_engine review_engine; do
     *) bin="" ;;
   esac
 
-  if [ -n "$bin" ] && ! command -v "$bin" >/dev/null 2>&1; then
+  if [ "$engine" != "codex" ] && [ -n "${bin:-}" ] && ! command -v "$bin" >/dev/null 2>&1; then
     echo "engine-readiness: missing binary for ${engine_key}=${engine} (${bin})" >&2
     missing=1
   fi

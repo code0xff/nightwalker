@@ -53,9 +53,20 @@
 ## Example Adapter Mapping
 
 - `claude` engine: Claude Code 명령/워크플로우로 intent 수행
-- `codex` engine: Codex CLI 명령/워크플로우로 intent 수행
+- `codex` engine: codex-plugin-cc 가용 시 Claude Code 세션 내에서 codex 도구(`/codex:rescue`, `/codex:review`, `/codex:adversarial-review`)를 사용하여 intent 수행. 플러그인 미설치 시 codex CLI fallback, CLI도 없으면 Claude 자체 수행
 - `openai` engine: OpenAI API 기반 내부 워크플로우로 intent 수행
 - `cursor`, `copilot`, `gemini`: 도구별 인터페이스는 달라도 위 intent contract는 유지
+
+## Codex Plugin Integration
+
+codex 엔진 어댑터(`run-codex-intent.sh`)는 다음 순서로 실행 방식을 결정한다.
+
+1. `check-codex-plugin.sh`로 가용성 확인
+2. `plugin` 모드: `claude -p`로 실행하되, 프롬프트에 codex 플러그인 도구 사용을 지시. Claude Code 세션이 런타임이므로 코드베이스 컨텍스트가 자연스럽게 공유됨
+3. `cli` 모드: `codex exec`로 직접 실행 (기존 방식)
+4. `none` 모드: `claude -p`로 실행, codex 없이 Claude가 자체 수행
+
+MCP 서버 설정은 `.mcp.json`에 정의한다. codex-mcp-server를 통해 Claude Code가 codex를 도구로 호출할 수 있다.
 
 ## Compatibility Rule
 

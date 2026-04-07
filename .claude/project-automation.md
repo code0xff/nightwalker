@@ -37,6 +37,7 @@
 ## Engine Adapter Commands (optional)
 
 - engine_cmd_codex: .claude/hooks/run-codex-intent.sh {intent} {goal} {model}
+# codex adapter: plugin 가용 시 claude -p 세션 내 codex 도구 사용, 아니면 codex CLI fallback
 - engine_cmd_claude: .claude/hooks/run-claude-intent.sh {intent} {goal} {model}
 - engine_cmd_openai: unset
 - engine_cmd_cursor: unset
