@@ -323,8 +323,8 @@ case "$codex_mode" in
     fi
     ;;
   none)
-    # codex 사용 불가 → Claude로 자체 수행
-    echo "codex-intent 경고: codex 사용 불가, Claude로 fallback합니다." >&2
+    # codex unavailable -> fallback to Claude without codex tools
+    echo "codex-intent warning: codex plugin and CLI both unavailable, falling back to Claude (no codex tools will be used)" >&2
     PROMPT="$(build_cli_prompt "$INTENT" "$GOAL")"
     if [ "$MODEL" != "unset" ]; then
       claude --model "$MODEL" -p "$PROMPT"
