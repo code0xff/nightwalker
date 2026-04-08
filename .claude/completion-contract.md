@@ -1,6 +1,6 @@
 # Completion Contract
 
-앱 개발 완료 판정을 위한 계약을 정의한다.
+프로젝트 개발 완료 판정을 위한 계약을 정의한다.
 기본 정책은 non-blocking(report)이며, 미설정/실패 항목은 최종 보고서에 남긴다.
 
 ## Contract

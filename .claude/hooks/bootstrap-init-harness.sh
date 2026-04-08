@@ -14,11 +14,44 @@ if [ ! -f "$APPROVALS_FILE" ]; then
   echo "bootstrap 실패: $APPROVALS_FILE 파일이 없습니다." >&2
   exit 2
 fi
+get_session_value() {
+  local key="$1"
+  local session_file=".devharness/session.yaml"
+  [ -f "$session_file" ] || return 0
+  grep -E "^${key}:" "$session_file" | head -n 1 | sed -E "s/^${key}:[[:space:]]*//" || true
+}
+
 if [ ! -f "$CONTRACT_FILE" ]; then
-  cat > "$CONTRACT_FILE" <<'EOF'
+  project_archetype="$(get_session_value project_archetype)"
+  if [ "$project_archetype" = "system-platform" ]; then
+    cat > "$CONTRACT_FILE" <<'EOF'
 # Completion Contract
 
-앱 개발 완료 판정을 위한 계약을 정의한다.
+프로젝트 개발 완료 판정을 위한 계약을 정의한다.
+기본 정책은 non-blocking(report)이며, 미설정/실패 항목은 최종 보고서에 남긴다.
+
+## Contract
+
+- done_enforcement: report
+- artifact_definition: interface contract validation completed
+- artifact_check_cmd: echo "artifact check is not configured"
+- run_smoke_cmd: echo "run smoke is not configured"
+- acceptance_test_cmd: .claude/hooks/run-automation-gates.sh push
+- release_readiness_cmd: .claude/hooks/run-quality-gates.sh push
+
+## System Platform Checks
+
+- interface_contract_check: public and internal interface contracts validated
+- compatibility_check: backward compatibility risks assessed
+- failure_mode_check: failure scenarios and recovery assumptions reviewed
+- operability_check: logs, metrics, health checks baseline confirmed
+EOF
+  else
+    # service-app (default)
+    cat > "$CONTRACT_FILE" <<'EOF'
+# Completion Contract
+
+프로젝트 개발 완료 판정을 위한 계약을 정의한다.
 기본 정책은 non-blocking(report)이며, 미설정/실패 항목은 최종 보고서에 남긴다.
 
 ## Contract
@@ -30,6 +63,7 @@ if [ ! -f "$CONTRACT_FILE" ]; then
 - acceptance_test_cmd: .claude/hooks/run-automation-gates.sh push
 - release_readiness_cmd: .claude/hooks/run-quality-gates.sh push
 EOF
+  fi
 fi
 
 set_automation_key() {

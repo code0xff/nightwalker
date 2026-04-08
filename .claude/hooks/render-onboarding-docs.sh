@@ -28,6 +28,7 @@ project_goal="$(normalize_value "$(get_value project_goal)")"
 target_users="$(normalize_value "$(get_value target_users)")"
 core_features="$(normalize_value "$(get_value core_features)")"
 constraints="$(normalize_value "$(get_value constraints)")"
+project_archetype="$(get_value project_archetype)"
 stack_1="$(normalize_value "$(get_value stack_candidate_1)")"
 stack_2="$(normalize_value "$(get_value stack_candidate_2)")"
 stack_3="$(normalize_value "$(get_value stack_candidate_3)")"
@@ -36,7 +37,26 @@ open_questions="$(normalize_value "$(get_value open_questions)")"
 
 mkdir -p "$DOCS_DIR"
 
-cat > "$DOCS_DIR/project-goal.md" <<DOC
+# project-goal.md — archetype별 분기
+if [ "$project_archetype" = "system-platform" ]; then
+  cat > "$DOCS_DIR/project-goal.md" <<DOC
+# Project Goal
+
+## System Goal
+
+- ${project_goal}
+
+## Primary Consumers
+
+- ${target_users}
+
+## Core System Capabilities
+
+- ${core_features}
+DOC
+else
+  # service-app (default)
+  cat > "$DOCS_DIR/project-goal.md" <<DOC
 # Project Goal
 
 ## Goal
@@ -51,8 +71,35 @@ cat > "$DOCS_DIR/project-goal.md" <<DOC
 
 - ${core_features}
 DOC
+fi
 
-cat > "$DOCS_DIR/scope.md" <<DOC
+# scope.md — archetype별 분기
+if [ "$project_archetype" = "system-platform" ]; then
+  cat > "$DOCS_DIR/scope.md" <<DOC
+# Scope
+
+## In Scope
+
+- Initial system capability set required for first functional release
+- Core interface contracts and protocol definitions
+
+## Out Of Scope
+
+- Advanced observability tooling beyond baseline
+- Non-critical performance tuning before core path is validated
+
+## Constraints
+
+- ${constraints}
+
+## Compatibility And Operability Constraints
+
+- backward compatibility requirements to be confirmed before each interface change
+- operability baseline (logs, metrics, health checks) required before release
+DOC
+else
+  # service-app (default)
+  cat > "$DOCS_DIR/scope.md" <<DOC
 # Scope
 
 ## In Scope
@@ -69,8 +116,45 @@ cat > "$DOCS_DIR/scope.md" <<DOC
 
 - ${constraints}
 DOC
+fi
 
-cat > "$DOCS_DIR/architecture.md" <<DOC
+# architecture.md — archetype별 분기
+if [ "$project_archetype" = "system-platform" ]; then
+  cat > "$DOCS_DIR/architecture.md" <<DOC
+# Architecture
+
+## System Boundary
+
+- Selected stack: ${selected_stack}
+- Scope of this system and what it does not own
+
+## Major Components
+
+- (to be defined per component responsibility)
+
+## Interface And Protocol Contract
+
+- Public or internal interfaces to be versioned and documented
+- Protocol stability requirements to be confirmed before implementation
+
+## Runtime Topology
+
+- Deployment model and component interaction at runtime
+
+## Observability Baseline
+
+- Structured logs
+- Key metrics
+- Health check endpoints
+
+## Failure Mode And Recovery Assumptions
+
+- Expected failure scenarios and recovery strategies
+- Graceful degradation assumptions
+DOC
+else
+  # service-app (default)
+  cat > "$DOCS_DIR/architecture.md" <<DOC
 # Architecture
 
 ## Baseline
@@ -85,7 +169,9 @@ cat > "$DOCS_DIR/architecture.md" <<DOC
 - Data access layer
 - Test and quality gate layer
 DOC
+fi
 
+# stack-decision.md — archetype 공통
 cat > "$DOCS_DIR/stack-decision.md" <<DOC
 # Stack Decision
 
@@ -104,7 +190,32 @@ cat > "$DOCS_DIR/stack-decision.md" <<DOC
 - ${open_questions}
 DOC
 
-cat > "$DOCS_DIR/roadmap.md" <<DOC
+# roadmap.md — archetype별 분기
+if [ "$project_archetype" = "system-platform" ]; then
+  cat > "$DOCS_DIR/roadmap.md" <<DOC
+# Roadmap
+
+## Workstream 1
+
+- Goal: define component boundaries, responsibilities, and interface contracts
+- Deliverables: system boundary document, interface/protocol definitions, component skeleton
+- Exit Criteria: all interfaces are documented and implementation can begin without open contract blockers
+
+## Workstream 2
+
+- Goal: implement the core system path end-to-end on the selected stack
+- Deliverables: primary data/control flow, inter-component wiring, integration baseline
+- Exit Criteria: core system path is functional and basic contract tests pass
+
+## Workstream 3
+
+- Goal: harden operability, compatibility, and failure resilience
+- Deliverables: observability baseline, backward compatibility checks, failure-mode test coverage
+- Exit Criteria: operability gates pass and the system is ready for production readiness validation
+DOC
+else
+  # service-app (default)
+  cat > "$DOCS_DIR/roadmap.md" <<DOC
 # Roadmap
 
 ## Workstream 1
@@ -125,8 +236,43 @@ cat > "$DOCS_DIR/roadmap.md" <<DOC
 - Deliverables: automation gates, regression coverage, release checklist
 - Exit Criteria: quality gates pass and the project is ready for release validation
 DOC
+fi
 
-cat > "$DOCS_DIR/execution-plan.md" <<DOC
+# execution-plan.md — archetype별 분기
+if [ "$project_archetype" = "system-platform" ]; then
+  cat > "$DOCS_DIR/execution-plan.md" <<DOC
+# Execution Plan
+
+## Global Plan
+
+- Define all interface contracts before implementation starts (contract-first)
+- Execute workstreams sequentially in roadmap order
+- Validate backward compatibility before each interface change
+- Run requirement QA after implementation and register remediation workstreams if needed
+- Re-run plan only when system boundary or interface contract decisions change
+
+## Workstream 1 Plan
+
+- Define system boundary and component responsibilities
+- Document interface and protocol contracts that downstream components depend on
+- Create the minimum skeleton required to validate contracts are implementable
+
+## Workstream 2 Plan
+
+- Implement the core system path end-to-end
+- Wire inter-component interfaces according to contracts defined in Workstream 1
+- Add contract tests and failure-path tests for the critical flow
+
+## Workstream 3 Plan
+
+- Add observability baseline (logs, metrics, health checks)
+- Validate backward compatibility and rollback assumptions
+- Test failure scenarios and recovery paths
+- Close operability and security gaps before release validation
+DOC
+else
+  # service-app (default)
+  cat > "$DOCS_DIR/execution-plan.md" <<DOC
 # Execution Plan
 
 ## Global Plan
@@ -154,6 +300,7 @@ cat > "$DOCS_DIR/execution-plan.md" <<DOC
 - Close security and operational readiness gaps
 - Prepare final quality/review pass for release
 DOC
+fi
 
-echo "render-onboarding-docs 완료: docs/*.md 생성"
+echo "render-onboarding-docs 완료: docs/*.md 생성 (archetype=${project_archetype:-unset})"
 exit 0

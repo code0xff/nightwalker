@@ -34,6 +34,7 @@ project_goal: unset
 target_users: unset
 core_features: unset
 constraints: unset
+project_archetype: unset
 stack_candidate_1: unset
 stack_candidate_2: unset
 stack_candidate_3: unset
@@ -68,13 +69,15 @@ set_status() {
 }
 
 is_ready_for_execution() {
-  local goal users stack
+  local goal users archetype stack
   goal="$(get_value project_goal)"
   users="$(get_value target_users)"
+  archetype="$(get_value project_archetype)"
   stack="$(get_value selected_stack)"
 
   if [ -z "$goal" ] || [ "$goal" = "unset" ] || \
      [ -z "$users" ] || [ "$users" = "unset" ] || \
+     [ -z "$archetype" ] || [ "$archetype" = "unset" ] || \
      [ -z "$stack" ] || [ "$stack" = "unset" ]; then
     return 1
   fi
@@ -162,9 +165,10 @@ maybe_start_autopilot() {
 }
 
 render_ready_report() {
-  local goal users stack status
+  local goal users archetype stack status
   goal="$(get_value project_goal)"
   users="$(get_value target_users)"
+  archetype="$(get_value project_archetype)"
   stack="$(get_value selected_stack)"
   status="ready"
 
@@ -184,22 +188,23 @@ render_ready_report() {
 - status: ${status}
 - project_goal: ${goal:-unset}
 - target_users: ${users:-unset}
+- project_archetype: ${archetype:-unset}
 - selected_stack: ${stack:-unset}
 
 ## First Workstreams
 
-1. Finalize API and data contracts from docs/architecture.md
-2. Implement MVP core flow from docs/execution-plan.md
+1. Finalize contracts and boundaries from docs/architecture.md
+2. Implement core flow from docs/execution-plan.md
 3. Add build/test/security gates from .claude/project-automation.md
 
 ## Next Action
 
 - If status is ready, autopilot starts automatically and plans all roadmap workstreams before building them in order.
-- If status is pending-input, fill project_goal, target_users, and selected_stack first.
+- If status is pending-input, fill project_goal, target_users, project_archetype, and selected_stack first.
 EOF2
 
   if [ "$status" = "pending-input" ]; then
-    echo "run-project-onboarding 경고: session.yaml에 미확정 값이 있습니다 (project_goal/target_users/selected_stack)."
+    echo "run-project-onboarding 경고: session.yaml에 미확정 값이 있습니다 (project_goal/target_users/project_archetype/selected_stack)."
   fi
 }
 
