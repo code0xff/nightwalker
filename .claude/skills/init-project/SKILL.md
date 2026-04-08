@@ -22,12 +22,14 @@ user-invocable: true
    - target_users
    - core_features
    - constraints
+   - 필요하면 웹 검색으로 해당 도메인의 선행 사례, 경쟁 제품, 업계 표준을 조사해 제안의 현실성을 높인다.
 3. 수집한 내용을 바탕으로 `project_archetype`을 추천한다.
    - `service-app`: 최종 사용자 기능 제공과 릴리스가 중심인 프로젝트 (SaaS, 웹앱, 모바일 백엔드, CRUD API 등)
    - `system-platform`: 시스템 계약/운영성/확장성이 중심인 프로젝트 (플랫폼 인프라, 분산 시스템, SDK, 데이터 파이프라인 등)
    - 추천은 자동으로 끝내지 않는다. 사용자가 `service-app` 또는 `system-platform` 중 하나를 최종 확정한다.
 4. 확정한 `project_archetype` 값을 `session.yaml`에 저장한다.
 5. stack 후보 3개를 제시한다.
+   - 후보를 제시하기 전에 웹 검색으로 각 스택의 최신 생태계 동향, 공식 문서, 커뮤니티 건강도를 확인한다.
    - 각 후보의 장점/리스크/운영 비용을 간단히 제시한다.
 6. 사용자가 최종 `selected_stack`을 고르게 한다.
 7. 확정값을 `session.yaml`에 반영하도록 편집을 수행한다.
