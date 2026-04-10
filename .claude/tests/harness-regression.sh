@@ -42,7 +42,10 @@ run_expect_fail_pipe() {
 cleanup() {
   cp "$AUTOMATION_BAK" .claude/project-automation.md
   cp "$APPROVALS_BAK" .claude/project-approvals.md
-  if [ -s "$SESSION_BAK" ]; then cp "$SESSION_BAK" .devharness/session.yaml; else rm -f .devharness/session.yaml; fi
+  mkdir -p .nightwalker
+  if [ -s "$SESSION_BAK" ]; then cp "$SESSION_BAK" .nightwalker/session.yaml; else rm -f .nightwalker/session.yaml; fi
+  rm -f .devharness/session.yaml
+  rmdir .devharness 2>/dev/null || true
   rm -f .claude/state/autopilot-state.json
   rm -f .claude/state/qa-report.md
   rm -f .claude/state/final-report.md
@@ -59,7 +62,7 @@ APPROVALS_BAK="$(mktemp)"
 SESSION_BAK="$(mktemp)"
 cp .claude/project-automation.md "$AUTOMATION_BAK"
 cp .claude/project-approvals.md "$APPROVALS_BAK"
-[ -f .devharness/session.yaml ] && cp .devharness/session.yaml "$SESSION_BAK" || true
+[ -f .nightwalker/session.yaml ] && cp .nightwalker/session.yaml "$SESSION_BAK" || true
 trap cleanup EXIT
 
 run_expect_ok "hook syntax" sh -c 'find .claude/hooks -type f -name "*.sh" -print0 | xargs -0 -I{} bash -n "{}"'
@@ -135,15 +138,15 @@ run_expect_ok "automation gates push" .claude/hooks/run-automation-gates.sh push
 run_expect_ok "quality gates push" .claude/hooks/run-quality-gates.sh push
 run_expect_ok "engine readiness check" .claude/hooks/check-engine-readiness.sh
 run_expect_ok "engine intent fallback plan" sh -c \
-  'DEV_HARNESS_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "ci-intent"'
+  'NIGHTWALKER_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "ci-intent"'
 run_expect_ok "qa check test mode" sh -c \
-  'DEV_HARNESS_TEST_MODE=true .claude/hooks/run-qa-check.sh "ci-qa" >/dev/null'
+  'NIGHTWALKER_TEST_MODE=true .claude/hooks/run-qa-check.sh "ci-qa" >/dev/null'
 run_expect_ok "done check report-only" .claude/hooks/run-done-check.sh
 
 run_expect_ok "autopilot start" sh -c \
-  'DEV_HARNESS_TEST_MODE=true AUTOPILOT_SKIP_VCS_WRITE=true .claude/hooks/run-autopilot.sh start "ci-regression"'
+  'NIGHTWALKER_TEST_MODE=true AUTOPILOT_SKIP_VCS_WRITE=true .claude/hooks/run-autopilot.sh start "ci-regression"'
 run_expect_ok "autopilot resume completed" sh -c \
-  'DEV_HARNESS_TEST_MODE=true AUTOPILOT_SKIP_VCS_WRITE=true .claude/hooks/run-autopilot.sh resume'
+  'NIGHTWALKER_TEST_MODE=true AUTOPILOT_SKIP_VCS_WRITE=true .claude/hooks/run-autopilot.sh resume'
 
 run_expect_ok "autopilot state completed" sh -c \
   'test "$(jq -r ".status" .claude/state/autopilot-state.json)" = "completed"'
@@ -153,7 +156,8 @@ run_expect_ok "final report generated" test -f .claude/state/final-report.md
 run_expect_ok "unset config report generated" .claude/hooks/report-unset-config.sh
 run_expect_ok "render onboarding docs" .claude/hooks/render-onboarding-docs.sh
 run_expect_ok "render onboarding docs system-platform" sh -c '
-cat > .devharness/session.yaml <<'"'"'EOF'"'"'
+mkdir -p .nightwalker
+cat > .nightwalker/session.yaml <<'"'"'EOF'"'"'
 schema_version: 1
 status: proposed
 project_goal: build a distributed queue
@@ -174,7 +178,7 @@ grep -q "System Boundary" docs/architecture.md &&
 grep -q "Interface And Protocol Contract" docs/architecture.md &&
 grep -q "Failure Mode And Recovery" docs/architecture.md &&
 grep -q "interface contracts" docs/roadmap.md || result=1
-cat > .devharness/session.yaml <<'"'"'RESET'"'"'
+cat > .nightwalker/session.yaml <<'"'"'RESET'"'"'
 schema_version: 1
 status: proposed
 project_goal: unset
@@ -221,7 +225,8 @@ for _ in 1 2 3; do .claude/hooks/register-qa-workstream.sh "ci-qa" >/dev/null ||
 .claude/hooks/register-qa-workstream.sh "ci-qa" >/dev/null'
 run_expect_ok "project onboarding flow" .claude/hooks/run-project-onboarding.sh
 run_expect_ok "onboarding auto-starts autopilot when ready" sh -c '
-cat > .devharness/session.yaml <<'"'"'EOF'"'"'
+mkdir -p .nightwalker
+cat > .nightwalker/session.yaml <<'"'"'EOF'"'"'
 schema_version: 1
 status: proposed
 project_goal: ci regression goal
@@ -236,11 +241,11 @@ selected_stack: bash
 open_questions: unset
 decisions: unset
 EOF
-DEV_HARNESS_TEST_MODE=true AUTOPILOT_SKIP_VCS_WRITE=true .claude/hooks/run-project-onboarding.sh >/dev/null &&
+NIGHTWALKER_TEST_MODE=true AUTOPILOT_SKIP_VCS_WRITE=true .claude/hooks/run-project-onboarding.sh >/dev/null &&
 test "$(jq -r ".status" .claude/state/autopilot-state.json)" = "completed"'
 run_expect_ok "bootstrap project helper" scripts/bootstrap-project.sh --skip-onboarding
 run_expect_ok "bootstrap project standalone install" sh -c \
-  'tmpdir=$(mktemp -d) && DEV_HARNESS_SOURCE="$PWD" scripts/bootstrap-project.sh "$tmpdir" --skip-onboarding && test -d "$tmpdir/.claude" && test -d "$tmpdir/.devharness" && rm -rf "$tmpdir"'
+  'tmpdir=$(mktemp -d) && NIGHTWALKER_SOURCE="$PWD" scripts/bootstrap-project.sh "$tmpdir" --skip-onboarding && test -d "$tmpdir/.claude" && test -d "$tmpdir/.nightwalker" && rm -rf "$tmpdir"'
 run_expect_ok "onboarding ready report exists" test -f ONBOARDING_READY.md
 run_expect_ok "onboarding docs generated" test -f docs/project-goal.md
 
@@ -255,13 +260,13 @@ run_expect_ok "intent-context collect_file_tree" bash -c \
 run_expect_ok "intent-context collect_project_docs includes generated docs" bash -c \
   'source .claude/hooks/intent-context.sh && docs="$(collect_project_docs 50)" && echo "$docs" | grep -q "project-goal.md"'
 run_expect_ok "claude intent build includes plan artifact" sh -c '
-DEV_HARNESS_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "ctx-test" >/dev/null
-out="$(DEV_HARNESS_TEST_MODE=true .claude/hooks/run-claude-intent.sh build "ctx-test")"
+NIGHTWALKER_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "ctx-test" >/dev/null
+out="$(NIGHTWALKER_TEST_MODE=true .claude/hooks/run-claude-intent.sh build "ctx-test")"
 echo "$out" | grep -q "Build Changes"'
 run_expect_ok "codex intent review includes build artifact" sh -c '
-DEV_HARNESS_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "ctx-test2" >/dev/null
-DEV_HARNESS_TEST_MODE=true .claude/hooks/run-engine-intent.sh build "ctx-test2" >/dev/null
-out="$(DEV_HARNESS_TEST_MODE=true .claude/hooks/run-codex-intent.sh review "ctx-test2")"
+NIGHTWALKER_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "ctx-test2" >/dev/null
+NIGHTWALKER_TEST_MODE=true .claude/hooks/run-engine-intent.sh build "ctx-test2" >/dev/null
+out="$(NIGHTWALKER_TEST_MODE=true .claude/hooks/run-codex-intent.sh review "ctx-test2")"
 echo "$out" | grep -q "Findings"'
 run_expect_ok "build-steps parses plan and runs steps" sh -c '
 mkdir -p .claude/state/intents
@@ -283,15 +288,15 @@ cat > .claude/state/intents/plan-9999999999-99999.md <<'"'"'PLAN'"'"'
 ## Uncertainties
 - none
 PLAN
-out="$(DEV_HARNESS_TEST_MODE=true .claude/hooks/run-build-steps.sh "step-test" 2>&1)"
+out="$(NIGHTWALKER_TEST_MODE=true .claude/hooks/run-build-steps.sh "step-test" 2>&1)"
 echo "$out" | grep -q "step 1" &&
 echo "$out" | grep -q "step 2" &&
 echo "$out" | grep -q "step 3" &&
 echo "$out" | grep -q "all 3 steps passed"
 rm -f .claude/state/intents/plan-9999999999-99999.md'
 run_expect_ok "build-steps fallback on no steps" sh -c '
-DEV_HARNESS_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "no-steps-test" >/dev/null
-out="$(DEV_HARNESS_TEST_MODE=true .claude/hooks/run-build-steps.sh "no-steps-test" 2>&1)"
+NIGHTWALKER_TEST_MODE=true .claude/hooks/run-engine-intent.sh plan "no-steps-test" >/dev/null
+out="$(NIGHTWALKER_TEST_MODE=true .claude/hooks/run-build-steps.sh "no-steps-test" 2>&1)"
 echo "$out" | grep -q "Build Changes"'
 
 # ── check-codex-plugin.sh detection logic ──

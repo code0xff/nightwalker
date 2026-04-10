@@ -2,8 +2,12 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=nightwalker-session.sh
+source "${SCRIPT_DIR}/nightwalker-session.sh"
+
 CONTRACT_FILE="${CONTRACT_FILE:-.claude/completion-contract.md}"
-SESSION_FILE="${SESSION_FILE:-.devharness/session.yaml}"
+SESSION_FILE="${SESSION_FILE:-$(nightwalker_resolve_session_file)}"
 
 if [ ! -f "$CONTRACT_FILE" ]; then
   echo "completion-contract 검증 실패: $CONTRACT_FILE 파일이 없습니다." >&2

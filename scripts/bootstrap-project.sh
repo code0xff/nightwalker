@@ -4,7 +4,7 @@ set -euo pipefail
 
 ROOT_DIR="."
 RUN_ONBOARDING=1
-SOURCE="${DEV_HARNESS_SOURCE:-https://github.com/code0xff/dev-harness.git}"
+SOURCE="${NIGHTWALKER_SOURCE:-${DEV_HARNESS_SOURCE:-https://github.com/code0xff/nightwalker.git}}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -39,7 +39,7 @@ install_harness() {
   local install_from=""
   local tmpdir=""
 
-  if [ -d "$src" ] && [ -d "$src/.claude" ] && [ -d "$src/.devharness" ]; then
+  if [ -d "$src" ] && [ -d "$src/.claude" ] && { [ -d "$src/.nightwalker" ] || [ -d "$src/.devharness" ]; }; then
     install_from="$src"
   else
     if ! command -v git >/dev/null 2>&1; then
@@ -48,19 +48,23 @@ install_harness() {
     fi
 
     tmpdir="$(mktemp -d)"
-    if ! git clone --depth 1 "$src" "$tmpdir/dev-harness" >/dev/null 2>&1; then
-      echo "bootstrap-project 실패: dev-harness를 가져오지 못했습니다: $src" >&2
+    if ! git clone --depth 1 "$src" "$tmpdir/nightwalker" >/dev/null 2>&1; then
+      echo "bootstrap-project 실패: Nightwalker를 가져오지 못했습니다: $src" >&2
       rm -rf "$tmpdir"
       exit 2
     fi
-    install_from="$tmpdir/dev-harness"
+    install_from="$tmpdir/nightwalker"
   fi
 
   if [ ! -d ".claude" ]; then
     cp -R "$install_from/.claude" .
   fi
-  if [ ! -d ".devharness" ]; then
-    cp -R "$install_from/.devharness" .
+  if [ ! -d ".nightwalker" ]; then
+    if [ -d "$install_from/.nightwalker" ]; then
+      cp -R "$install_from/.nightwalker" .
+    elif [ -d "$install_from/.devharness" ]; then
+      cp -R "$install_from/.devharness" .nightwalker
+    fi
   fi
   if [ ! -f "CLAUDE.md" ] && [ -f "$install_from/CLAUDE.md" ]; then
     cp "$install_from/CLAUDE.md" .
@@ -71,7 +75,7 @@ install_harness() {
   fi
 }
 
-if [ ! -d ".claude" ] || [ ! -d ".devharness" ]; then
+if [ ! -d ".claude" ] || { [ ! -d ".nightwalker" ] && [ ! -d ".devharness" ]; }; then
   install_harness "$SOURCE"
 fi
 

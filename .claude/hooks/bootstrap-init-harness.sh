@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=nightwalker-session.sh
+source "${SCRIPT_DIR}/nightwalker-session.sh"
+
 AUTOMATION_FILE=".claude/project-automation.md"
 APPROVALS_FILE=".claude/project-approvals.md"
 CONTRACT_FILE=".claude/completion-contract.md"
@@ -16,7 +20,8 @@ if [ ! -f "$APPROVALS_FILE" ]; then
 fi
 get_session_value() {
   local key="$1"
-  local session_file=".devharness/session.yaml"
+  local session_file
+  session_file="$(nightwalker_resolve_session_file)"
   [ -f "$session_file" ] || return 0
   grep -E "^${key}:" "$session_file" | head -n 1 | sed -E "s/^${key}:[[:space:]]*//" || true
 }

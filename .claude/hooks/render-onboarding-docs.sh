@@ -2,7 +2,12 @@
 
 set -euo pipefail
 
-SESSION_FILE=".devharness/session.yaml"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=nightwalker-session.sh
+source "${SCRIPT_DIR}/nightwalker-session.sh"
+
+nightwalker_ensure_session_storage
+SESSION_FILE="$(nightwalker_resolve_session_file)"
 DOCS_DIR="docs"
 
 if [ ! -f "$SESSION_FILE" ]; then

@@ -12,6 +12,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=intent-context.sh
 source "${SCRIPT_DIR}/intent-context.sh"
+# shellcheck source=nightwalker-session.sh
+source "${SCRIPT_DIR}/nightwalker-session.sh"
 
 PLUGIN_CHECK="${SCRIPT_DIR}/check-codex-plugin.sh"
 INTENT="${1:-}"
@@ -261,7 +263,7 @@ EOF
 
 # ── 테스트 모드 ──
 
-if [ "${DEV_HARNESS_TEST_MODE:-false}" = "true" ]; then
+if nightwalker_is_test_mode; then
   case "$INTENT" in
     plan)
       cat <<EOF

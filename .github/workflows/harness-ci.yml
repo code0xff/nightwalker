@@ -1,4 +1,4 @@
-name: Harness CI
+name: Nightwalker CI
 
 on:
   push:

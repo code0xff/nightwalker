@@ -2,7 +2,11 @@
 
 set -euo pipefail
 
-SESSION_FILE=".devharness/session.yaml"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=nightwalker-session.sh
+source "${SCRIPT_DIR}/nightwalker-session.sh"
+
+SESSION_FILE="$(nightwalker_resolve_session_file)"
 AUTOMATION_FILE=".claude/project-automation.md"
 SUGGEST_HOOK=".claude/hooks/suggest-automation-gates.sh"
 BOOTSTRAP_HOOK=".claude/hooks/bootstrap-init-harness.sh"
@@ -22,7 +26,8 @@ require_hook() {
 }
 
 ensure_session_file() {
-  mkdir -p .devharness
+  nightwalker_ensure_session_storage
+  SESSION_FILE="$(nightwalker_session_file_default)"
   if [ -f "$SESSION_FILE" ]; then
     return 0
   fi

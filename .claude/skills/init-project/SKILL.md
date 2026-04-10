@@ -16,7 +16,7 @@ user-invocable: true
 
 ## 실행 순서
 
-1. `.devharness/session.yaml`을 먼저 읽는다.
+1. `.nightwalker/session.yaml`을 먼저 읽는다.
 2. 아래 질문을 통해 미확정 값을 채운다.
    - project_goal
    - target_users

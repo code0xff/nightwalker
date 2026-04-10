@@ -1,18 +1,18 @@
-# dev-harness
+# Nightwalker
 
 AI 개발 워크플로우를 위한 harness rules/skills 모음.
 기본값은 Claude 중심 프로파일을 권장하지만, 프로젝트 시작 시 엔진/모델을 고정해 범용으로 운영할 수 있다.
 
 ## 빠른 시작 (curl|bash 단독)
 
-빈 폴더에서 아래 한 줄만 실행하면 `.claude`와 `.devharness`를 자동으로 설치하고 온보딩을 시작한다.
+빈 폴더에서 아래 한 줄만 실행하면 `.claude`와 `.nightwalker`를 자동으로 설치하고 온보딩을 시작한다.
 
 ```bash
 mkdir my-project && cd my-project
-curl -fsSL https://raw.githubusercontent.com/code0xff/dev-harness/main/scripts/bootstrap-project.sh | bash
+curl -fsSL https://raw.githubusercontent.com/code0xff/nightwalker/main/scripts/bootstrap-project.sh | bash
 ```
 
-이 명령은 `dev-harness`를 자동으로 내려받아 실행 권한을 맞추고 온보딩 훅을 1회 실행한다.
+이 명령은 `Nightwalker`를 자동으로 내려받아 실행 권한을 맞추고 온보딩 훅을 1회 실행한다.
 이후 Claude에서 `/init-project`를 실행하면 목표/스택 확정과 문서/정책 동기화가 자동으로 완료되고, 준비가 끝나면 autopilot이 `/plan -> build`를 이어서 수행한다. 기본 목표는 remote 없이 로컬 개발을 끝까지 완주하는 것이다.
 
 `session.yaml`을 수동으로 편집한 경우에만 아래 명령으로 동기화를 다시 실행한다.
@@ -23,11 +23,11 @@ curl -fsSL https://raw.githubusercontent.com/code0xff/dev-harness/main/scripts/b
 
 ## 수동 사용법
 
-새 프로젝트에 `.claude/`와 `.devharness/`를 복사해 사용할 수도 있다.
+새 프로젝트에 `.claude/`와 `.nightwalker/`를 복사해 사용할 수도 있다.
 
 ```bash
 cp -r .claude/ /path/to/your-project/.claude/
-cp -r .devharness/ /path/to/your-project/.devharness/
+cp -r .nightwalker/ /path/to/your-project/.nightwalker/
 ```
 
 ## 구성
@@ -144,7 +144,7 @@ cp -r .devharness/ /path/to/your-project/.devharness/
 .claude/hooks/run-project-onboarding.sh
 ```
 
-온보딩 입력 상태는 `.devharness/session.yaml`에 저장된다.
+온보딩 입력 상태는 `.nightwalker/session.yaml`에 저장된다.
 이 파일을 기준으로 아래 문서가 자동 생성된다.
 
 - `docs/project-goal.md`

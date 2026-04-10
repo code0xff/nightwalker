@@ -14,6 +14,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=intent-context.sh
 source "${SCRIPT_DIR}/intent-context.sh"
+# shellcheck source=nightwalker-session.sh
+source "${SCRIPT_DIR}/nightwalker-session.sh"
 
 PROFILE_FILE=".claude/project-profile.md"
 AUTOMATION_FILE=".claude/project-automation.md"
@@ -147,7 +149,7 @@ Fix the issue and complete the step."
     # step 목표만 전달하면 됨
     local full_goal="${GOAL} -- ${step_goal}${error_context}"
 
-    if [ "${DEV_HARNESS_TEST_MODE:-false}" = "true" ]; then
+    if nightwalker_is_test_mode; then
       mkdir -p "$STATE_DIR"
       local step_artifact="${STATE_DIR}/build-step-${step_number}-$(date +%s)-$RANDOM.md"
       cat > "$step_artifact" <<EOF

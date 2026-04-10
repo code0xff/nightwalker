@@ -5,6 +5,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=intent-context.sh
 source "${SCRIPT_DIR}/intent-context.sh"
+# shellcheck source=nightwalker-session.sh
+source "${SCRIPT_DIR}/nightwalker-session.sh"
 
 PROFILE_FILE=".claude/project-profile.md"
 AUTOMATION_FILE=".claude/project-automation.md"
@@ -148,7 +150,7 @@ EOF
 
 mkdir -p "$(dirname "$REPORT_FILE")"
 
-if [ "${DEV_HARNESS_TEST_MODE:-false}" = "true" ]; then
+if nightwalker_is_test_mode; then
   cat > "$REPORT_FILE" <<EOF
 # QA Report
 - status: pass
